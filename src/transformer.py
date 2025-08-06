@@ -1,4 +1,4 @@
-from src.models import DriverAddPayload, CarrierSettings
+from src.models import DriverAddPayload
 from config import settings
 from username_manager import get_username_manager
 import re
@@ -109,7 +109,6 @@ def row_to_payload(row) -> DriverAddPayload | None:
     )
 
     return DriverAddPayload(
-        carrierSettings=_carrier_settings(),
         externalIds={
             "paycomname": paycom_key,  # Add the composite key
             "email": f"{username}@example.com",
@@ -126,16 +125,4 @@ def row_to_payload(row) -> DriverAddPayload | None:
         timezone=tz,
         eldExempt=True,
         eldExemptReason="Short Haul",
-    )
-
-
-def _carrier_settings() -> CarrierSettings:
-    """Create carrier settings (implementation depends on your config)."""
-    # This would come from your settings/config
-    return CarrierSettings(
-        carrierName=settings.carrier_name,
-        dotNumber=settings.dot_number,
-        homeTerminalAddress=settings.home_terminal_address,
-        homeTerminalName=settings.home_terminal_name,
-        mainOfficeAddress=settings.main_office_address,
     )

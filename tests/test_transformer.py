@@ -43,18 +43,6 @@ def _setup_transformer(monkeypatch: pytest.MonkeyPatch):
 
     importlib.reload(transformer)
 
-    monkeypatch.setattr(
-        transformer,
-        "_carrier_settings",
-        lambda: transformer.CarrierSettings(
-            carrierName="Acme",
-            dotNumber=123,
-            homeTerminalAddress="123 Main",
-            homeTerminalName="Main",
-            mainOfficeAddress="456 Elm",
-        ),
-    )
-
     return transformer
 
 

@@ -10,13 +10,6 @@ def test_driver_add_payload_typing() -> None:
     from src import models
 
     payload = models.DriverAddPayload(
-        carrierSettings=models.CarrierSettings(
-            carrierName="Acme Logistics",
-            dotNumber=1234567,
-            homeTerminalAddress="123 Main St",
-            homeTerminalName="Main",
-            mainOfficeAddress="456 Elm St",
-        ),
         externalIds={"employeeId": "E123"},
         name="John Doe",
         username="jdoe",
@@ -32,7 +25,6 @@ def test_driver_add_payload_typing() -> None:
     assert payload.peerGroupTagId == "group1"
 
     payload_no_peer = models.DriverAddPayload(
-        carrierSettings=payload.carrierSettings,
         externalIds=payload.externalIds,
         name=payload.name,
         username=payload.username,
@@ -50,13 +42,6 @@ def test_driver_add_payload_defaults_phone_none() -> None:
     from src import models
 
     payload = models.DriverAddPayload(
-        carrierSettings=models.CarrierSettings(
-            carrierName="Acme Logistics",
-            dotNumber=1234567,
-            homeTerminalAddress="123 Main St",
-            homeTerminalName="Main",
-            mainOfficeAddress="456 Elm St",
-        ),
         externalIds={"employeeId": "E123"},
         name="Jane Doe",
         username="jdoe2",

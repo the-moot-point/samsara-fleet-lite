@@ -1,6 +1,10 @@
 """
 Username manager for handling duplicate checking and persistence.
 Ensures all usernames are unique across Samsara platform.
+
+The manager can both generate and register unique usernames via
+``make_unique`` and preview the next available username without
+modifying state using ``check_available``.
 """
 
 import atexit
@@ -15,7 +19,12 @@ log = logging.getLogger(__name__)
 
 
 class UsernameManager:
-    """Thread-safe manager for username uniqueness and persistence."""
+    """Thread-safe manager for username uniqueness and persistence.
+
+    Besides registering usernames with :meth:`make_unique`, callers can
+    use :meth:`check_available` to preview the next available username
+    without altering the underlying CSV or in-memory set.
+    """
 
     def __init__(self, csv_path: Path = None):
         """
@@ -139,6 +148,39 @@ class UsernameManager:
                     raise ValueError(
                         f"Unable to generate unique username for base: {username}"
                     )
+
+    def check_available(self, base_username: str) -> str:
+        """Return the next available username without persisting it.
+
+        This mirrors the behaviour of :meth:`make_unique` but performs a
+        read‑only check. The internal username set and backing CSV remain
+        unchanged.
+
+        Args:
+            base_username: Desired username to check.
+
+        Returns:
+            The username that would be assigned by :meth:`make_unique`.
+
+        Raises:
+            ValueError: If no unique username could be found after 9999
+                attempts.
+        """
+        with self._lock:
+            username = base_username.lower()
+            if username not in self._usernames:
+                return username
+
+            counter = 2
+            while counter <= 9999:
+                candidate = f"{username}{counter}"
+                if candidate not in self._usernames:
+                    return candidate
+                counter += 1
+
+        raise ValueError(
+            f"Unable to generate unique username for base: {base_username.lower()}"
+        )
 
     def add_username(self, username: str) -> None:
         """

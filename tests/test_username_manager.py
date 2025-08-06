@@ -49,3 +49,20 @@ def test_persistence(tmp_path: Path) -> None:
 
     new_manager = UsernameManager(csv_path=csv)
     assert new_manager.exists(username)
+
+
+def test_check_available_does_not_modify_state(tmp_path: Path) -> None:
+    csv = tmp_path / "usernames.csv"
+    manager = UsernameManager(csv_path=csv)
+
+    manager.add_username("alice")
+    manager.flush()
+
+    before = csv.read_text()
+
+    predicted = manager.check_available("alice")
+    assert predicted == "alice2"
+    assert not manager.exists(predicted)
+
+    after = csv.read_text()
+    assert before == after

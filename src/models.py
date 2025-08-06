@@ -17,7 +17,7 @@ class DriverAddPayload(BaseModel):
     username: str
     password: str
     notes: str
-    phone: Optional[str]
+    phone: str | None = None
     licenseState: str
     eldExempt: bool = True
     eldExemptReason: str = "Short Haul"

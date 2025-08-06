@@ -44,3 +44,26 @@ def test_driver_add_payload_typing() -> None:
     )
 
     assert payload_no_peer.peerGroupTagId is None
+
+
+def test_driver_add_payload_defaults_phone_none() -> None:
+    from src import models
+
+    payload = models.DriverAddPayload(
+        carrierSettings=models.CarrierSettings(
+            carrierName="Acme Logistics",
+            dotNumber=1234567,
+            homeTerminalAddress="123 Main St",
+            homeTerminalName="Main",
+            mainOfficeAddress="456 Elm St",
+        ),
+        externalIds={"employeeId": "E123"},
+        name="Jane Doe",
+        username="jdoe2",
+        password="secret",
+        notes="Test driver",
+        licenseState="CA",
+        tagIds=["tag1"],
+    )
+
+    assert payload.phone is None

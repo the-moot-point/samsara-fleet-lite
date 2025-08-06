@@ -155,7 +155,6 @@ def main(
     level = logging.DEBUG if verbose else logging.INFO
     logging.basicConfig(level=level, format="%(asctime)s %(levelname)s %(message)s")
     log = logging.getLogger(__name__)
-    global log
 
     # List available files if requested
     if list_files:
@@ -264,7 +263,6 @@ def main(
             paycom_key = generate_paycom_key(first_name, last_name, hire_date)
 
             driver_found = False
-            used_fallback = False
 
             # Try external ID lookup first
             if paycom_key:
@@ -311,7 +309,6 @@ def main(
                 if driver:
                     driver_id = driver["id"]
                     driver_name = driver["name"]
-                    used_fallback = True
                     stats["used_fallback"] += 1
 
                     # Check if already deactivated
@@ -343,7 +340,7 @@ def main(
                                 driver_id, "paycomname", paycom_key
                             )
                             log.info(
-                                f"Added paycomname external ID for future reference"
+                                "Added paycomname external ID for future reference"
                             )
 
                     driver_found = True

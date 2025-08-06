@@ -4,7 +4,6 @@ Combines all operations: add, deactivate, sync, migration, and utilities.
 """
 
 import typer
-from typing import Optional
 from datetime import datetime
 
 # Import command modules
@@ -56,7 +55,6 @@ def process(
     typer.echo("📋 Step 1: Processing Terminations")
     typer.echo("-" * 40)
     try:
-        ctx = typer.Context(deactivate_drivers.app)
         deactivate_drivers.main(
             file=None,  # Use latest
             dry_run=dry_run,
@@ -74,7 +72,6 @@ def process(
     typer.echo("📋 Step 2: Processing New Hires")
     typer.echo("-" * 40)
     try:
-        ctx = typer.Context(add_drivers.app)
         add_drivers.main(
             file=None,  # Use latest
             dry_run=dry_run,
@@ -157,11 +154,11 @@ def status():
     # Check Samsara connection and external IDs
     typer.echo("\n🌐 Samsara API:")
     try:
-        from samsara_client import get_drivers_by_status, get_all_drivers
+        from samsara_client import get_drivers_by_status
 
         active = get_drivers_by_status("active")
         deactivated = get_drivers_by_status("deactivated")
-        typer.echo(f"   ✅ Connected")
+        typer.echo("   ✅ Connected")
         typer.echo(f"   Active drivers: {len(active)}")
         typer.echo(f"   Deactivated drivers: {len(deactivated)}")
 
@@ -170,14 +167,14 @@ def status():
         with_external_id = sum(
             1 for d in all_drivers if "paycomname" in d.get("externalIds", {})
         )
-        typer.echo(f"\n🔗 External ID Status:")
+        typer.echo("\n🔗 External ID Status:")
         typer.echo(
             f"   Drivers with paycomname ID: {with_external_id}/{len(all_drivers)} ({with_external_id*100/len(all_drivers):.1f}%)"
         )
 
         if with_external_id < len(all_drivers):
-            typer.echo(f"   💡 Run 'migrate verify' to see details")
-            typer.echo(f"   💡 Run 'migrate backfill-external-ids' to add missing IDs")
+            typer.echo("   💡 Run 'migrate verify' to see details")
+            typer.echo("   💡 Run 'migrate backfill-external-ids' to add missing IDs")
 
     except Exception as e:
         typer.echo(f"   ❌ Connection failed: {e}")
@@ -213,14 +210,14 @@ def test():
     try:
         finder = PayrollFileFinder()
         if finder.hires_dir.exists():
-            typer.echo(f"   ✅ Hires directory exists")
+            typer.echo("   ✅ Hires directory exists")
             tests_passed += 1
         else:
             typer.echo(f"   ⚠️  Hires directory not found: {finder.hires_dir}")
             tests_failed += 1
 
         if finder.terms_dir.exists():
-            typer.echo(f"   ✅ Terms directory exists")
+            typer.echo("   ✅ Terms directory exists")
             tests_passed += 1
         else:
             typer.echo(f"   ⚠️  Terms directory not found: {finder.terms_dir}")

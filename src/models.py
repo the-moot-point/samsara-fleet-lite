@@ -2,16 +2,7 @@ from pydantic import BaseModel
 from typing import Optional, List
 
 
-class CarrierSettings(BaseModel):
-    carrierName: str
-    dotNumber: int
-    homeTerminalAddress: str
-    homeTerminalName: str
-    mainOfficeAddress: str
-
-
 class DriverAddPayload(BaseModel):
-    carrierSettings: CarrierSettings
     externalIds: dict[str, str]
     name: str
     username: str

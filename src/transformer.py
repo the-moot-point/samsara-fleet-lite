@@ -118,6 +118,7 @@ def row_to_payload(row) -> DriverAddPayload | None:
         username=username,
         password=settings.default_password,
         notes=f"Hire Date: {row.Hire_Date:%m-%d-%Y}",
+        phone=getattr(row, "Phone", None),
         licenseState=row.State,
         peerGroupTagId=pos_tag,
         tagIds=tag_ids,

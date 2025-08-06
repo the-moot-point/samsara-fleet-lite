@@ -2,6 +2,7 @@
 Process employee terminations from payroll reports.
 Deactivates drivers in Samsara based on termination data using external IDs.
 """
+
 import typer
 import logging
 import re
@@ -13,10 +14,11 @@ from samsara_client import (
     get_all_drivers,
     patch_driver,
     get_driver_by_external_id,
-    deactivate_driver_by_external_id
+    deactivate_driver_by_external_id,
 )
 
 app = typer.Typer()
+
 
 def read_terminations_xlsx(path: str) -> pd.DataFrame:
     """
@@ -28,7 +30,13 @@ def read_terminations_xlsx(path: str) -> pd.DataFrame:
     df = pd.read_excel(path, dtype=str)
 
     # Expected columns (adjust based on your actual report)
-    expected_cols = ["Legal_Firstname", "Legal_Lastname", "Termination_Date", "Employee_Status", "Hire_Date"]
+    expected_cols = [
+        "Legal_Firstname",
+        "Legal_Lastname",
+        "Termination_Date",
+        "Employee_Status",
+        "Hire_Date",
+    ]
 
     # Check which columns exist (Hire_Date might not be in termination report)
     available_cols = []
@@ -37,7 +45,9 @@ def read_terminations_xlsx(path: str) -> pd.DataFrame:
             available_cols.append(col)
         elif col == "Hire_Date":
             # Hire_Date is optional for terminations
-            log.warning("Hire_Date not found in termination report - will use name-based fallback if needed")
+            log.warning(
+                "Hire_Date not found in termination report - will use name-based fallback if needed"
+            )
         else:
             log.error(f"Required column missing: {col}")
 
@@ -80,7 +90,9 @@ def generate_paycom_key(first: str, last: str, hire_date) -> str:
         return None
 
 
-def find_driver_by_name(drivers: List[Dict], first_name: str, last_name: str) -> Optional[Dict]:
+def find_driver_by_name(
+    drivers: List[Dict], first_name: str, last_name: str
+) -> Optional[Dict]:
     """
     Legacy: Find a driver in Samsara by name.
     Used as fallback when external ID lookup fails.
@@ -114,11 +126,24 @@ def find_driver_by_name(drivers: List[Dict], first_name: str, last_name: str) ->
 
 @app.command()
 def main(
-    file: Optional[str] = typer.Argument(None, help="Path to termination Excel file. If not provided, uses latest from OneDrive"),
-    dry_run: bool = typer.Option(False, "--dry-run", help="Preview changes without making API calls"),
-    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose logging"),
-    list_files: bool = typer.Option(False, "--list", help="List available termination files and exit"),
-    fallback: bool = typer.Option(True, "--fallback/--no-fallback", help="Use name matching as fallback when external ID not found")
+    file: Optional[str] = typer.Argument(
+        None,
+        help="Path to termination Excel file. If not provided, uses latest from OneDrive",
+    ),
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="Preview changes without making API calls"
+    ),
+    verbose: bool = typer.Option(
+        False, "--verbose", "-v", help="Enable verbose logging"
+    ),
+    list_files: bool = typer.Option(
+        False, "--list", help="List available termination files and exit"
+    ),
+    fallback: bool = typer.Option(
+        True,
+        "--fallback/--no-fallback",
+        help="Use name matching as fallback when external ID not found",
+    ),
 ):
     """
     Deactivate drivers in Samsara based on termination report.
@@ -128,10 +153,7 @@ def main(
     """
     # Setup logging
     level = logging.DEBUG if verbose else logging.INFO
-    logging.basicConfig(
-        level=level,
-        format="%(asctime)s %(levelname)s %(message)s"
-    )
+    logging.basicConfig(level=level, format="%(asctime)s %(levelname)s %(message)s")
     log = logging.getLogger(__name__)
     global log
 
@@ -145,12 +167,16 @@ def main(
             typer.echo("=" * 60)
             for report in reports["term_reports"][:10]:  # Show max 10 most recent
                 age = report.get("age_hours", 0)
-                age_str = f"{age:.1f} hours ago" if age < 48 else f"{age/24:.1f} days ago"
+                age_str = (
+                    f"{age:.1f} hours ago" if age < 48 else f"{age/24:.1f} days ago"
+                )
                 typer.echo(f"  • {report['name']}")
                 typer.echo(f"    Created: {age_str}")
 
             if len(reports["term_reports"]) > 10:
-                typer.echo(f"\n  ... and {len(reports['term_reports']) - 10} more older files")
+                typer.echo(
+                    f"\n  ... and {len(reports['term_reports']) - 10} more older files"
+                )
         else:
             typer.echo("❌ No Termination Reports found in the configured directory")
         return
@@ -182,7 +208,9 @@ def main(
                     typer.echo(f"   Created: {age/24:.1f} days ago")
         except FileNotFoundError as e:
             typer.echo(f"❌ {e}", err=True)
-            typer.echo("💡 Tip: Check your TERMS_DIR setting or specify a file manually")
+            typer.echo(
+                "💡 Tip: Check your TERMS_DIR setting or specify a file manually"
+            )
             raise typer.Exit(1)
 
     # Read termination file
@@ -198,7 +226,9 @@ def main(
     # Check if we have hire dates
     has_hire_dates = "Hire_Date" in df.columns
     if not has_hire_dates:
-        log.warning("⚠️  No Hire_Date column in termination report - external ID lookup may fail")
+        log.warning(
+            "⚠️  No Hire_Date column in termination report - external ID lookup may fail"
+        )
         if fallback:
             log.info("Will use name-based fallback when needed")
         else:
@@ -219,7 +249,7 @@ def main(
         "already_deactivated": 0,
         "failed": 0,
         "used_fallback": 0,
-        "not_found_details": []
+        "not_found_details": [],
     }
 
     # Process each termination
@@ -250,23 +280,27 @@ def main(
                             log.info(f"Already deactivated: {first_name} {last_name}")
                             stats["already_deactivated"] += 1
                         else:
-                            log.info(f"[DRY RUN] Would deactivate: {first_name} {last_name} (terminated {term_date:%Y-%m-%d})")
+                            log.info(
+                                f"[DRY RUN] Would deactivate: {first_name} {last_name} (terminated {term_date:%Y-%m-%d})"
+                            )
                             stats["deactivated"] += 1
                 else:
                     # Actually deactivate the driver
                     success = deactivate_driver_by_external_id(
-                        "paycomname",
-                        paycom_key,
-                        term_date.strftime("%m-%d-%Y")
+                        "paycomname", paycom_key, term_date.strftime("%m-%d-%Y")
                     )
                     if success:
-                        log.info(f"✅ Deactivated: {first_name} {last_name} (terminated {term_date:%Y-%m-%d})")
+                        log.info(
+                            f"✅ Deactivated: {first_name} {last_name} (terminated {term_date:%Y-%m-%d})"
+                        )
                         stats["deactivated"] += 1
                         driver_found = True
 
             # Fallback to name matching if external ID failed
             if not driver_found and fallback:
-                log.info(f"External ID lookup failed for {first_name} {last_name}, trying name-based fallback")
+                log.info(
+                    f"External ID lookup failed for {first_name} {last_name}, trying name-based fallback"
+                )
 
                 # Need to fetch drivers if not already done
                 if not active_drivers:
@@ -285,23 +319,32 @@ def main(
                         log.info(f"Already deactivated: {driver_name}")
                         stats["already_deactivated"] += 1
                     elif dry_run:
-                        log.info(f"[DRY RUN] Would deactivate (via fallback): {driver_name} (terminated {term_date:%Y-%m-%d})")
+                        log.info(
+                            f"[DRY RUN] Would deactivate (via fallback): {driver_name} (terminated {term_date:%Y-%m-%d})"
+                        )
                         stats["deactivated"] += 1
                     else:
                         # Deactivate using driver ID
                         patch_data = {
                             "driverActivationStatus": "deactivated",
-                            "notes": f"Terminated: {term_date:%m-%d-%Y}"
+                            "notes": f"Terminated: {term_date:%m-%d-%Y}",
                         }
                         patch_driver(driver_id, patch_data)
-                        log.info(f"✅ Deactivated (via fallback): {driver_name} (terminated {term_date:%Y-%m-%d})")
+                        log.info(
+                            f"✅ Deactivated (via fallback): {driver_name} (terminated {term_date:%Y-%m-%d})"
+                        )
                         stats["deactivated"] += 1
 
                         # Try to add the external ID for future use
                         if paycom_key:
                             from samsara_client import add_external_id_to_driver
-                            add_external_id_to_driver(driver_id, "paycomname", paycom_key)
-                            log.info(f"Added paycomname external ID for future reference")
+
+                            add_external_id_to_driver(
+                                driver_id, "paycomname", paycom_key
+                            )
+                            log.info(
+                                f"Added paycomname external ID for future reference"
+                            )
 
                     driver_found = True
 
@@ -309,11 +352,15 @@ def main(
             if not driver_found:
                 log.warning(f"Driver not found: {first_name} {last_name}")
                 stats["not_found"] += 1
-                stats["not_found_details"].append({
-                    "name": f"{first_name} {last_name}",
-                    "paycom_key": paycom_key or "N/A (no hire date)",
-                    "reason": "No hire date" if not paycom_key else "Not in Samsara"
-                })
+                stats["not_found_details"].append(
+                    {
+                        "name": f"{first_name} {last_name}",
+                        "paycom_key": paycom_key or "N/A (no hire date)",
+                        "reason": (
+                            "No hire date" if not paycom_key else "Not in Samsara"
+                        ),
+                    }
+                )
 
         except Exception as exc:
             log.error(f"❌ Failed to deactivate {first_name} {last_name}: {exc}")
@@ -322,9 +369,9 @@ def main(
                 log.exception("Full error details:")
 
     # Print summary
-    typer.echo("\n" + "="*50)
+    typer.echo("\n" + "=" * 50)
     typer.echo("TERMINATION PROCESSING SUMMARY")
-    typer.echo("="*50)
+    typer.echo("=" * 50)
     typer.echo(f"File processed: {file_path.name}")
     typer.echo(f"Total terminations: {stats['total']}")
     if not dry_run:
@@ -357,7 +404,9 @@ def main(
 def check(
     first: str = typer.Argument(..., help="First name"),
     last: str = typer.Argument(..., help="Last name"),
-    hire_date: Optional[str] = typer.Option(None, "--hire-date", help="Hire date in MM-DD-YYYY format")
+    hire_date: Optional[str] = typer.Option(
+        None, "--hire-date", help="Hire date in MM-DD-YYYY format"
+    ),
 ):
     """
     Check if a specific driver exists in Samsara by external ID or name.
@@ -407,7 +456,9 @@ def check(
     else:
         typer.echo(f"❌ Not found: {first} {last}")
         if hire_date:
-            paycom_key = generate_paycom_key(first, last, pd.to_datetime(hire_date, format="%m-%d-%Y"))
+            paycom_key = generate_paycom_key(
+                first, last, pd.to_datetime(hire_date, format="%m-%d-%Y")
+            )
             typer.echo(f"   Searched for external ID: paycomname:{paycom_key}")
 
 

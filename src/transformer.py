@@ -63,7 +63,9 @@ def _generate_paycom_key(first: str, last: str, hire_date) -> str:
 def row_to_payload(row) -> DriverAddPayload | None:
     # Skip positions in the exclude list
     if row.Position in _EXCLUDE_POS:
-        _log.info(f"Skipping {row.Legal_Firstname} {row.Legal_Lastname} - position '{row.Position}' is excluded")
+        _log.info(
+            f"Skipping {row.Legal_Firstname} {row.Legal_Lastname} - position '{row.Position}' is excluded"
+        )
         return None
 
     loc_info = _LOC_MAP.get(row.Work_Location)
@@ -77,8 +79,12 @@ def row_to_payload(row) -> DriverAddPayload | None:
     if row.Position and not isna(row.Position) and row.Position.strip():
         pos_tag = _POS_TAGS.get(row.Position.strip())
         if not pos_tag:
-            _log.warning("Position tag missing: '%s' (row %s %s)",
-                         row.Position, row.Legal_Firstname, row.Legal_Lastname)
+            _log.warning(
+                "Position tag missing: '%s' (row %s %s)",
+                row.Position,
+                row.Legal_Firstname,
+                row.Legal_Lastname,
+            )
 
     tag_ids = [loc_tag]
     if pos_tag:
@@ -90,17 +96,23 @@ def row_to_payload(row) -> DriverAddPayload | None:
     # Log if username was modified
     base_username = _generate_base_username(row.Legal_Firstname, row.Legal_Lastname)
     if username != base_username:
-        _log.info(f"Username modified for uniqueness: {row.Legal_Firstname} {row.Legal_Lastname} -> {username}")
+        _log.info(
+            f"Username modified for uniqueness: {row.Legal_Firstname} {row.Legal_Lastname} -> {username}"
+        )
 
     # Generate paycom key for external ID
-    paycom_key = _generate_paycom_key(row.Legal_Firstname, row.Legal_Lastname, row.Hire_Date)
-    _log.debug(f"Generated paycom key: {paycom_key} for {row.Legal_Firstname} {row.Legal_Lastname}")
+    paycom_key = _generate_paycom_key(
+        row.Legal_Firstname, row.Legal_Lastname, row.Hire_Date
+    )
+    _log.debug(
+        f"Generated paycom key: {paycom_key} for {row.Legal_Firstname} {row.Legal_Lastname}"
+    )
 
     return DriverAddPayload(
         carrierSettings=_carrier_settings(),
         externalIds={
             "paycomname": paycom_key,  # Add the composite key
-            "email": f"{username}@example.com"
+            "email": f"{username}@example.com",
         },
         name=f"{row.Legal_Firstname} {row.Legal_Lastname}",
         username=username,

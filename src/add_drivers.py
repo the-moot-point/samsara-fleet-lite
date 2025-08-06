@@ -8,7 +8,7 @@ from transformer import row_to_payload, _generate_paycom_key
 from samsara_client import (
     add_driver,
     get_driver_by_external_id,
-    update_driver_by_external_id
+    update_driver_by_external_id,
 )
 from username_manager import get_username_manager
 from file_finder import PayrollFileFinder, get_latest_hire_file
@@ -18,13 +18,24 @@ app = typer.Typer()
 
 @app.command()
 def main(
-        file: Optional[str] = typer.Argument(None,
-                                             help="Path to Excel file. If not provided, uses latest from OneDrive"),
-        dry_run: bool = typer.Option(False, "--dry-run", help="Preview changes without making API calls"),
-        verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose logging"),
-        sync_first: bool = typer.Option(False, "--sync", help="Sync with Samsara before processing"),
-        list_files: bool = typer.Option(False, "--list", help="List available report files and exit"),
-        update_existing: bool = typer.Option(False, "--update", help="Update existing drivers if found")
+    file: Optional[str] = typer.Argument(
+        None, help="Path to Excel file. If not provided, uses latest from OneDrive"
+    ),
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="Preview changes without making API calls"
+    ),
+    verbose: bool = typer.Option(
+        False, "--verbose", "-v", help="Enable verbose logging"
+    ),
+    sync_first: bool = typer.Option(
+        False, "--sync", help="Sync with Samsara before processing"
+    ),
+    list_files: bool = typer.Option(
+        False, "--list", help="List available report files and exit"
+    ),
+    update_existing: bool = typer.Option(
+        False, "--update", help="Update existing drivers if found"
+    ),
 ):
     """
     Add new drivers from payroll Excel file to Samsara.
@@ -34,10 +45,7 @@ def main(
     """
     # Setup logging
     level = logging.DEBUG if verbose else logging.INFO
-    logging.basicConfig(
-        level=level,
-        format="%(asctime)s %(levelname)s %(message)s"
-    )
+    logging.basicConfig(level=level, format="%(asctime)s %(levelname)s %(message)s")
     log = logging.getLogger(__name__)
 
     # List available files if requested
@@ -50,12 +58,16 @@ def main(
             typer.echo("=" * 60)
             for report in reports["hire_reports"][:10]:  # Show max 10 most recent
                 age = report.get("age_hours", 0)
-                age_str = f"{age:.1f} hours ago" if age < 48 else f"{age / 24:.1f} days ago"
+                age_str = (
+                    f"{age:.1f} hours ago" if age < 48 else f"{age / 24:.1f} days ago"
+                )
                 typer.echo(f"  • {report['name']}")
                 typer.echo(f"    Created: {age_str}")
 
             if len(reports["hire_reports"]) > 10:
-                typer.echo(f"\n  ... and {len(reports['hire_reports']) - 10} more older files")
+                typer.echo(
+                    f"\n  ... and {len(reports['hire_reports']) - 10} more older files"
+                )
         else:
             typer.echo("❌ No New Hire Reports found in the configured directory")
         return
@@ -87,16 +99,21 @@ def main(
                     typer.echo(f"   Created: {age / 24:.1f} days ago")
         except FileNotFoundError as e:
             typer.echo(f"❌ {e}", err=True)
-            typer.echo("💡 Tip: Check your HIRES_DIR setting or specify a file manually")
+            typer.echo(
+                "💡 Tip: Check your HIRES_DIR setting or specify a file manually"
+            )
             raise typer.Exit(1)
 
     # Optionally sync existing usernames first
     if sync_first:
         log.info("Syncing existing Samsara usernames (active and deactivated)...")
         from samsara_client import get_all_drivers
+
         manager = get_username_manager()
         drivers = get_all_drivers(include_deactivated=True)
-        samsara_usernames = {d['username'] for d in drivers if 'username' in d and d['username']}
+        samsara_usernames = {
+            d["username"] for d in drivers if "username" in d and d["username"]
+        }
         manager.sync_with_samsara(samsara_usernames)
         log.info(f"Synced {len(samsara_usernames)} existing usernames")
 
@@ -120,7 +137,7 @@ def main(
         "reactivated": 0,
         "failed": 0,
         "modified_usernames": [],
-        "existing_drivers": []
+        "existing_drivers": [],
     }
 
     # Process each employee
@@ -128,23 +145,25 @@ def main(
         try:
             # Check if driver already exists using external ID
             paycom_key = _generate_paycom_key(
-                row.Legal_Firstname,
-                row.Legal_Lastname,
-                row.Hire_Date
+                row.Legal_Firstname, row.Legal_Lastname, row.Hire_Date
             )
 
             existing_driver = get_driver_by_external_id("paycomname", paycom_key)
 
             if existing_driver:
                 # Driver already exists
-                driver_name = existing_driver.get("name", f"{row.Legal_Firstname} {row.Legal_Lastname}")
+                driver_name = existing_driver.get(
+                    "name", f"{row.Legal_Firstname} {row.Legal_Lastname}"
+                )
                 driver_status = existing_driver.get("driverActivationStatus", "active")
 
-                stats["existing_drivers"].append({
-                    "name": driver_name,
-                    "status": driver_status,
-                    "paycom_key": paycom_key
-                })
+                stats["existing_drivers"].append(
+                    {
+                        "name": driver_name,
+                        "status": driver_status,
+                        "paycom_key": paycom_key,
+                    }
+                )
 
                 if driver_status == "deactivated":
                     # Reactivate the driver
@@ -156,9 +175,11 @@ def main(
                             # Reactivate the driver
                             update_data = {
                                 "driverActivationStatus": "active",
-                                "notes": f"Reactivated: {row.Hire_Date:%m-%d-%Y}"
+                                "notes": f"Reactivated: {row.Hire_Date:%m-%d-%Y}",
                             }
-                            success = update_driver_by_external_id("paycomname", paycom_key, update_data)
+                            success = update_driver_by_external_id(
+                                "paycomname", paycom_key, update_data
+                            )
                             if success:
                                 log.info(f"✅ Reactivated: {driver_name}")
                                 stats["reactivated"] += 1
@@ -166,7 +187,9 @@ def main(
                                 log.error(f"Failed to reactivate: {driver_name}")
                                 stats["failed"] += 1
                     else:
-                        log.info(f"Driver exists but is deactivated: {driver_name} (use --update to reactivate)")
+                        log.info(
+                            f"Driver exists but is deactivated: {driver_name} (use --update to reactivate)"
+                        )
                         stats["already_exists"] += 1
                 else:
                     # Driver is active, check if we should update
@@ -183,12 +206,16 @@ def main(
                                     "tagIds": payload.tagIds,
                                     "timezone": payload.timezone,
                                     "licenseState": payload.licenseState,
-                                    "notes": f"Updated: {row.Hire_Date:%m-%d-%Y}"
+                                    "notes": f"Updated: {row.Hire_Date:%m-%d-%Y}",
                                 }
                                 if payload.peerGroupTagId:
-                                    update_data["peerGroupTagId"] = payload.peerGroupTagId
+                                    update_data["peerGroupTagId"] = (
+                                        payload.peerGroupTagId
+                                    )
 
-                                success = update_driver_by_external_id("paycomname", paycom_key, update_data)
+                                success = update_driver_by_external_id(
+                                    "paycomname", paycom_key, update_data
+                                )
                                 if success:
                                     log.info(f"✅ Updated: {driver_name}")
                                     stats["updated"] += 1
@@ -206,36 +233,55 @@ def main(
             payload = row_to_payload(row)
 
             if payload is None:
-                log.info(f"Skipped {row.Legal_Firstname} {row.Legal_Lastname} (excluded position)")
+                log.info(
+                    f"Skipped {row.Legal_Firstname} {row.Legal_Lastname} (excluded position)"
+                )
                 stats["skipped"] += 1
                 continue
 
             # Check if username was modified
             import re
-            base_username = re.sub(r"[^a-z0-9]", "", f"{row.Legal_Firstname[0]}{row.Legal_Lastname}".lower())
+
+            base_username = re.sub(
+                r"[^a-z0-9]",
+                "",
+                f"{row.Legal_Firstname[0]}{row.Legal_Lastname}".lower(),
+            )
             if payload.username != base_username:
-                stats["modified_usernames"].append({
-                    "name": f"{row.Legal_Firstname} {row.Legal_Lastname}",
-                    "original": base_username,
-                    "modified": payload.username
-                })
-                log.info(f"Username modified: {row.Legal_Firstname} {row.Legal_Lastname} -> {payload.username}")
+                stats["modified_usernames"].append(
+                    {
+                        "name": f"{row.Legal_Firstname} {row.Legal_Lastname}",
+                        "original": base_username,
+                        "modified": payload.username,
+                    }
+                )
+                log.info(
+                    f"Username modified: {row.Legal_Firstname} {row.Legal_Lastname} -> {payload.username}"
+                )
 
             if dry_run:
-                log.info(f"[DRY RUN] Would add: {row.Legal_Firstname} {row.Legal_Lastname} as '{payload.username}'")
+                log.info(
+                    f"[DRY RUN] Would add: {row.Legal_Firstname} {row.Legal_Lastname} as '{payload.username}'"
+                )
                 log.info(f"          External ID: paycomname:{paycom_key}")
                 if verbose:
-                    log.debug(f"Payload: {json.dumps(payload.dict(exclude_none=True), indent=2)}")
+                    log.debug(
+                        f"Payload: {json.dumps(payload.dict(exclude_none=True), indent=2)}"
+                    )
                 stats["added"] += 1
             else:
                 # Actually add the driver
                 add_driver(payload)
-                log.info(f"✅ Added: {row.Legal_Firstname} {row.Legal_Lastname} as '{payload.username}'")
+                log.info(
+                    f"✅ Added: {row.Legal_Firstname} {row.Legal_Lastname} as '{payload.username}'"
+                )
                 log.info(f"   External ID: paycomname:{paycom_key}")
                 stats["added"] += 1
 
         except Exception as exc:
-            log.error(f"❌ Failed to process {row.Legal_Firstname} {row.Legal_Lastname}: {exc}")
+            log.error(
+                f"❌ Failed to process {row.Legal_Firstname} {row.Legal_Lastname}: {exc}"
+            )
             stats["failed"] += 1
             if verbose:
                 log.exception("Full error details:")
@@ -248,36 +294,38 @@ def main(
     typer.echo(f"Total employees processed: {stats['total']}")
 
     if not dry_run:
-        if stats['added'] > 0:
+        if stats["added"] > 0:
             typer.echo(f"✅ Successfully added: {stats['added']}")
-        if stats['updated'] > 0:
+        if stats["updated"] > 0:
             typer.echo(f"📝 Updated existing: {stats['updated']}")
-        if stats['reactivated'] > 0:
+        if stats["reactivated"] > 0:
             typer.echo(f"♻️  Reactivated: {stats['reactivated']}")
     else:
-        if stats['added'] > 0:
+        if stats["added"] > 0:
             typer.echo(f"Would add: {stats['added']}")
-        if stats['updated'] > 0:
+        if stats["updated"] > 0:
             typer.echo(f"Would update: {stats['updated']}")
-        if stats['reactivated'] > 0:
+        if stats["reactivated"] > 0:
             typer.echo(f"Would reactivate: {stats['reactivated']}")
 
-    if stats['already_exists'] > 0:
+    if stats["already_exists"] > 0:
         typer.echo(f"Already exists: {stats['already_exists']}")
-    if stats['skipped'] > 0:
+    if stats["skipped"] > 0:
         typer.echo(f"Skipped (excluded positions): {stats['skipped']}")
-    if stats['failed'] > 0:
+    if stats["failed"] > 0:
         typer.echo(f"❌ Failed: {stats['failed']}")
 
     if stats["existing_drivers"]:
         typer.echo(f"\n📋 Existing drivers found ({len(stats['existing_drivers'])}):")
         for item in stats["existing_drivers"][:10]:
-            status_icon = "✅" if item['status'] == "active" else "⏸️"
+            status_icon = "✅" if item["status"] == "active" else "⏸️"
             typer.echo(f"  {status_icon} {item['name']} ({item['status']})")
         if len(stats["existing_drivers"]) > 10:
             typer.echo(f"  ... and {len(stats['existing_drivers']) - 10} more")
 
-        if not update_existing and any(d['status'] == 'deactivated' for d in stats['existing_drivers']):
+        if not update_existing and any(
+            d["status"] == "deactivated" for d in stats["existing_drivers"]
+        ):
             typer.echo("\n💡 Tip: Use --update flag to reactivate deactivated drivers")
 
     if stats["modified_usernames"]:
@@ -295,9 +343,9 @@ def main(
 
 @app.command()
 def check(
-        first: str = typer.Argument(..., help="First name"),
-        last: str = typer.Argument(..., help="Last name"),
-        hire_date: str = typer.Argument(..., help="Hire date in MM-DD-YYYY format")
+    first: str = typer.Argument(..., help="First name"),
+    last: str = typer.Argument(..., help="Last name"),
+    hire_date: str = typer.Argument(..., help="Hire date in MM-DD-YYYY format"),
 ):
     """
     Check if a driver would be added or already exists.
@@ -335,7 +383,9 @@ def check(
         typer.echo(f"   External IDs: {existing_driver.get('externalIds', {})}")
 
         if status == "deactivated":
-            typer.echo("\n💡 This driver is deactivated. Use --update flag when running 'add' to reactivate.")
+            typer.echo(
+                "\n💡 This driver is deactivated. Use --update flag when running 'add' to reactivate."
+            )
     else:
         typer.echo(f"\n❌ Driver does NOT exist in Samsara")
         typer.echo("   This driver would be ADDED if processed.")

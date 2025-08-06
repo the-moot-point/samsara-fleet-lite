@@ -4,12 +4,15 @@ from typing import Mapping, Set
 
 BASE_DIR = Path(__file__).resolve().parent.parent / "data"
 
+
 def _read_csv(path: Path) -> pd.DataFrame:
     return pd.read_csv(path, dtype=str).fillna("")
+
 
 def load_position_tags() -> Mapping[str, str]:
     df = _read_csv(BASE_DIR / "positions.csv")
     return dict(zip(df["Position"], df["TagId"]))
+
 
 def load_location_tags_and_timezones() -> dict[str, dict[str, str]]:
     """
@@ -28,6 +31,7 @@ def load_location_tags_and_timezones() -> dict[str, dict[str, str]]:
         }
         for _, row in df.iterrows()
     }
+
 
 def load_never_positions() -> Set[str]:
     df = _read_csv(BASE_DIR / "never_positions.csv")

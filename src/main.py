@@ -2,6 +2,7 @@
 Main CLI for Samsara Driver Sync System.
 Combines all operations: add, deactivate, sync, migration, and utilities.
 """
+
 import typer
 from typing import Optional
 from datetime import datetime
@@ -17,16 +18,28 @@ app = typer.Typer(help="Samsara Driver Sync System")
 
 # Add subcommands
 app.add_typer(add_drivers.app, name="add", help="Add new drivers from hire reports")
-app.add_typer(deactivate_drivers.app, name="deactivate", help="Deactivate drivers from termination reports")
+app.add_typer(
+    deactivate_drivers.app,
+    name="deactivate",
+    help="Deactivate drivers from termination reports",
+)
 app.add_typer(sync_usernames.app, name="username", help="Username management utilities")
-app.add_typer(migrate_external_ids.app, name="migrate", help="External ID migration utilities")
+app.add_typer(
+    migrate_external_ids.app, name="migrate", help="External ID migration utilities"
+)
 
 
 @app.command()
 def process(
-    dry_run: bool = typer.Option(False, "--dry-run", help="Preview changes without making API calls"),
-    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose logging"),
-    update_existing: bool = typer.Option(False, "--update", help="Update/reactivate existing drivers")
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="Preview changes without making API calls"
+    ),
+    verbose: bool = typer.Option(
+        False, "--verbose", "-v", help="Enable verbose logging"
+    ),
+    update_existing: bool = typer.Option(
+        False, "--update", help="Update/reactivate existing drivers"
+    ),
 ):
     """
     Process both new hires and terminations using the latest reports.
@@ -34,9 +47,9 @@ def process(
 
     Now uses external IDs (paycomname) for reliable driver matching.
     """
-    typer.echo("\n" + "="*60)
+    typer.echo("\n" + "=" * 60)
     typer.echo("SAMSARA DRIVER SYNC - FULL PROCESS")
-    typer.echo("="*60)
+    typer.echo("=" * 60)
     typer.echo(f"Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
 
     # Process terminations first (to free up usernames)
@@ -49,7 +62,7 @@ def process(
             dry_run=dry_run,
             verbose=verbose,
             list_files=False,
-            fallback=True  # Use name fallback if needed
+            fallback=True,  # Use name fallback if needed
         )
         typer.echo("✅ Terminations processed successfully\n")
     except FileNotFoundError:
@@ -68,7 +81,7 @@ def process(
             verbose=verbose,
             sync_first=True,  # Sync usernames before adding
             list_files=False,
-            update_existing=update_existing  # Update/reactivate if found
+            update_existing=update_existing,  # Update/reactivate if found
         )
         typer.echo("✅ New hires processed successfully\n")
     except FileNotFoundError:
@@ -76,9 +89,9 @@ def process(
     except Exception as e:
         typer.echo(f"❌ Error processing new hires: {e}\n")
 
-    typer.echo("="*60)
+    typer.echo("=" * 60)
     typer.echo(f"Completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    typer.echo("="*60)
+    typer.echo("=" * 60)
 
 
 @app.command()
@@ -86,18 +99,22 @@ def status():
     """
     Show system status and available reports.
     """
-    typer.echo("\n" + "="*60)
+    typer.echo("\n" + "=" * 60)
     typer.echo("SAMSARA DRIVER SYNC - SYSTEM STATUS")
-    typer.echo("="*60)
+    typer.echo("=" * 60)
 
     finder = PayrollFileFinder()
 
     # Check directories
     typer.echo("\n📁 Configured Directories:")
     typer.echo(f"  Hires: {finder.hires_dir}")
-    typer.echo(f"         {'✅ Exists' if finder.hires_dir.exists() else '❌ Not found'}")
+    typer.echo(
+        f"         {'✅ Exists' if finder.hires_dir.exists() else '❌ Not found'}"
+    )
     typer.echo(f"  Terms: {finder.terms_dir}")
-    typer.echo(f"         {'✅ Exists' if finder.terms_dir.exists() else '❌ Not found'}")
+    typer.echo(
+        f"         {'✅ Exists' if finder.terms_dir.exists() else '❌ Not found'}"
+    )
 
     # Show latest reports
     reports = finder.list_all_reports("both")
@@ -124,6 +141,7 @@ def status():
 
     # Check username database
     from username_manager import get_username_manager
+
     try:
         manager = get_username_manager()
         usernames = manager.get_all_usernames()
@@ -140,6 +158,7 @@ def status():
     typer.echo("\n🌐 Samsara API:")
     try:
         from samsara_client import get_drivers_by_status, get_all_drivers
+
         active = get_drivers_by_status("active")
         deactivated = get_drivers_by_status("deactivated")
         typer.echo(f"   ✅ Connected")
@@ -148,9 +167,13 @@ def status():
 
         # Check external ID coverage
         all_drivers = active + deactivated
-        with_external_id = sum(1 for d in all_drivers if "paycomname" in d.get("externalIds", {}))
+        with_external_id = sum(
+            1 for d in all_drivers if "paycomname" in d.get("externalIds", {})
+        )
         typer.echo(f"\n🔗 External ID Status:")
-        typer.echo(f"   Drivers with paycomname ID: {with_external_id}/{len(all_drivers)} ({with_external_id*100/len(all_drivers):.1f}%)")
+        typer.echo(
+            f"   Drivers with paycomname ID: {with_external_id}/{len(all_drivers)} ({with_external_id*100/len(all_drivers):.1f}%)"
+        )
 
         if with_external_id < len(all_drivers):
             typer.echo(f"   💡 Run 'migrate verify' to see details")
@@ -168,7 +191,7 @@ def test():
     Run a test to verify all components are working.
     """
     typer.echo("\n🧪 Running System Tests...")
-    typer.echo("="*60)
+    typer.echo("=" * 60)
 
     tests_passed = 0
     tests_failed = 0
@@ -177,6 +200,7 @@ def test():
     typer.echo("\n1. Testing configuration...")
     try:
         from config import settings
+
         assert settings.api_token, "API token not set"
         typer.echo("   ✅ Configuration loaded")
         tests_passed += 1
@@ -209,6 +233,7 @@ def test():
     typer.echo("\n3. Testing mapping files...")
     try:
         from mapping_loader import load_position_tags, load_location_tags_and_timezones
+
         positions = load_position_tags()
         locations = load_location_tags_and_timezones()
         typer.echo(f"   ✅ Loaded {len(positions)} positions")
@@ -222,6 +247,7 @@ def test():
     typer.echo("\n4. Testing username manager...")
     try:
         from username_manager import get_username_manager
+
         manager = get_username_manager()
         test_username = manager.make_unique("testuser9999")
         manager._usernames.discard(test_username)  # Clean up test
@@ -235,6 +261,7 @@ def test():
     typer.echo("\n5. Testing Samsara API connection...")
     try:
         from samsara_client import get_drivers_by_status
+
         drivers = get_drivers_by_status("active")
         typer.echo(f"   ✅ API connected ({len(drivers)} active drivers)")
         tests_passed += 1
@@ -246,6 +273,7 @@ def test():
     typer.echo("\n6. Testing external ID functions...")
     try:
         from samsara_client import get_driver_by_external_id
+
         # Test with a non-existent ID (should return None, not error)
         result = get_driver_by_external_id("paycomname", "test_nonexistent_2099-01-01")
         if result is None:
@@ -259,13 +287,13 @@ def test():
         tests_failed += 1
 
     # Summary
-    typer.echo("\n" + "="*60)
+    typer.echo("\n" + "=" * 60)
     typer.echo(f"Test Results: {tests_passed} passed, {tests_failed} failed")
     if tests_failed == 0:
         typer.echo("✅ All systems operational!")
     else:
         typer.echo(f"⚠️  {tests_failed} test(s) failed. Check configuration.")
-    typer.echo("="*60 + "\n")
+    typer.echo("=" * 60 + "\n")
 
 
 @app.command()
@@ -273,9 +301,9 @@ def quickstart():
     """
     Interactive quickstart guide for new users.
     """
-    typer.echo("\n" + "="*60)
+    typer.echo("\n" + "=" * 60)
     typer.echo("🚀 SAMSARA DRIVER SYNC - QUICKSTART GUIDE")
-    typer.echo("="*60)
+    typer.echo("=" * 60)
 
     typer.echo("\nWelcome! This guide will help you get started.\n")
 
@@ -289,6 +317,7 @@ def quickstart():
     typer.echo("This ensures we don't create duplicate usernames.")
     if typer.confirm("Sync usernames from Samsara?", default=True):
         from sync_usernames import sync
+
         sync(verbose=False)
 
     # Step 3: Check for drivers without external IDs
@@ -296,16 +325,23 @@ def quickstart():
     typer.echo("External IDs ensure reliable driver matching.")
     if typer.confirm("Check external ID status?", default=True):
         from migrate_external_ids import verify
+
         verify(verbose=False)
 
         # Offer to migrate if needed
-        typer.echo("\nIf you have drivers without external IDs, you should migrate them.")
+        typer.echo(
+            "\nIf you have drivers without external IDs, you should migrate them."
+        )
         if typer.confirm("Would you like to see migration options?"):
             typer.echo("\nMigration options:")
             typer.echo("1. If you have a recent hire report with all employees:")
-            typer.echo("   python main.py migrate backfill-external-ids --hire-report path/to/report.xlsx --execute")
+            typer.echo(
+                "   python main.py migrate backfill-external-ids --hire-report path/to/report.xlsx --execute"
+            )
             typer.echo("\n2. For individual drivers:")
-            typer.echo("   python main.py migrate add-single John Smith 01-15-2024 --execute")
+            typer.echo(
+                "   python main.py migrate add-single John Smith 01-15-2024 --execute"
+            )
 
     # Step 4: Process reports
     typer.echo("\nStep 4: Process payroll reports...")
@@ -319,7 +355,7 @@ def quickstart():
 
     typer.echo("\n✅ Setup complete! You're ready to sync drivers.")
     typer.echo("\n📚 For more help, check the README or run: python main.py --help")
-    typer.echo("="*60 + "\n")
+    typer.echo("=" * 60 + "\n")
 
 
 if __name__ == "__main__":

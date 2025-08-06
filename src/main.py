@@ -246,8 +246,8 @@ def test():
         from username_manager import get_username_manager
 
         manager = get_username_manager()
-        test_username = manager.make_unique("testuser9999")
-        manager._usernames.discard(test_username)  # Clean up test
+        # Preview a username to ensure manager responds without modifying state
+        _ = manager.check_available("testuser9999")
         typer.echo("   ✅ Username manager working")
         tests_passed += 1
     except Exception as e:

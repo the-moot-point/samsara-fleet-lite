@@ -62,10 +62,10 @@ def read_terminations_xlsx(path: str) -> pd.DataFrame:
     return df.reset_index(drop=True)
 
 
-def generate_paycom_key(first: str, last: str, hire_date) -> str:
-    """
-    Generate the paycom key for external ID lookup.
-    Must match the format used in transformer.py
+def generate_paycom_key(first: str, last: str, hire_date) -> Optional[str]:
+    """Generate the paycom key for external ID lookup.
+
+    Must match the format used in ``transformer.py``
     Format: firstname-lastname_MM-DD-YYYY
     Example: John-Smith_01-15-2024
 
@@ -75,7 +75,7 @@ def generate_paycom_key(first: str, last: str, hire_date) -> str:
         hire_date: Hire date (pandas datetime or None)
 
     Returns:
-        URL-safe paycom key
+        URL-safe paycom key, or ``None`` if ``hire_date`` is missing
     """
     # Remove special characters and spaces, keep only alphanumeric
     first_clean = re.sub(r"[^a-zA-Z0-9]", "", first)

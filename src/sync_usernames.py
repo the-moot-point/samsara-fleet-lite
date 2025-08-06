@@ -62,8 +62,8 @@ def status(
         typer.echo(f"\n⚠️  In Samsara but not in CSV: {len(in_samsara_not_csv)}")
         if verbose and len(in_samsara_not_csv) <= 20:
             for username in sorted(in_samsara_not_csv):
-                status = samsara_status[username]
-                typer.echo(f"   - {username} ({status})")
+                driver_status = samsara_status[username]
+                typer.echo(f"   - {username} ({driver_status})")
         typer.echo("\n💡 Tip: Run 'sync' command to add these to your local CSV")
 
     if not in_csv_not_samsara and not in_samsara_not_csv:

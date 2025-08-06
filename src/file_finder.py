@@ -6,7 +6,7 @@ Handles both new hires and termination reports from OneDrive directories.
 import re
 from pathlib import Path
 from datetime import datetime
-from typing import Optional, Tuple
+from typing import Optional
 import logging
 
 log = logging.getLogger(__name__)

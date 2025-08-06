@@ -355,8 +355,8 @@ def check(
     # Parse hire date
     try:
         hire_dt = pd.to_datetime(hire_date, format="%m-%d-%Y")
-    except:
-        typer.echo(f"❌ Invalid date format. Use MM-DD-YYYY")
+    except ValueError:
+        typer.echo("❌ Invalid date format. Use MM-DD-YYYY")
         raise typer.Exit(1)
 
     # Generate paycom key
@@ -387,7 +387,7 @@ def check(
                 "\n💡 This driver is deactivated. Use --update flag when running 'add' to reactivate."
             )
     else:
-        typer.echo(f"\n❌ Driver does NOT exist in Samsara")
+        typer.echo("\n❌ Driver does NOT exist in Samsara")
         typer.echo("   This driver would be ADDED if processed.")
 
         # Check what username would be generated

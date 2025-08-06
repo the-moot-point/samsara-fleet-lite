@@ -6,10 +6,8 @@ Run this once to backfill all drivers that were created before the external ID s
 import typer
 import logging
 import re
-from typing import Optional, Dict, List
-from datetime import datetime
+from typing import Optional
 import pandas as pd
-from pathlib import Path
 
 app = typer.Typer()
 
@@ -67,7 +65,7 @@ def backfill_external_ids(
         else:
             drivers_with_ids.append(driver)
 
-    typer.echo(f"\n📊 Current Status:")
+    typer.echo("\n📊 Current Status:")
     typer.echo(f"   Drivers with paycomname ID: {len(drivers_with_ids)}")
     typer.echo(f"   Drivers needing paycomname ID: {len(drivers_needing_ids)}")
 
@@ -148,7 +146,7 @@ def backfill_external_ids(
                             "hire_date": hire_date,
                         }
                         log.debug(f"Extracted hire date from notes for {driver_name}")
-                except:
+                except ValueError:
                     pass
 
         if employee_info:
@@ -240,7 +238,7 @@ def verify(
             with_other_ids.append(driver)
 
     # Print statistics
-    typer.echo(f"\n📊 External ID Statistics:")
+    typer.echo("\n📊 External ID Statistics:")
     typer.echo(f"   Total drivers: {len(all_drivers)}")
     typer.echo(
         f"   With paycomname ID: {len(with_paycom)} ({len(with_paycom)*100/len(all_drivers):.1f}%)"
@@ -251,7 +249,7 @@ def verify(
     typer.echo(f"   With other external IDs only: {len(with_other_ids)}")
 
     if verbose and without_paycom:
-        typer.echo(f"\n❌ Drivers missing paycomname ID:")
+        typer.echo("\n❌ Drivers missing paycomname ID:")
         for driver in without_paycom[:20]:
             status = driver.get("driverActivationStatus", "active")
             typer.echo(f"   • {driver.get('name', 'Unknown')} ({status})")
@@ -261,7 +259,7 @@ def verify(
             typer.echo(f"   ... and {len(without_paycom) - 20} more")
 
     if verbose and with_paycom:
-        typer.echo(f"\n✅ Sample of drivers with paycomname ID:")
+        typer.echo("\n✅ Sample of drivers with paycomname ID:")
         for driver in with_paycom[:5]:
             paycom_id = driver["externalIds"]["paycomname"]
             typer.echo(f"   • {driver.get('name', 'Unknown')}: {paycom_id}")
@@ -285,8 +283,8 @@ def add_single(
     # Parse hire date
     try:
         hire_dt = pd.to_datetime(hire_date, format="%m-%d-%Y")
-    except:
-        typer.echo(f"❌ Invalid date format. Use MM-DD-YYYY")
+    except ValueError:
+        typer.echo("❌ Invalid date format. Use MM-DD-YYYY")
         raise typer.Exit(1)
 
     # Generate paycom key
@@ -332,7 +330,7 @@ def add_single(
                 f"✅ Successfully added paycomname:{paycom_key} to {driver_found['name']}"
             )
         else:
-            typer.echo(f"❌ Failed to add external ID")
+            typer.echo("❌ Failed to add external ID")
             raise typer.Exit(1)
 
 

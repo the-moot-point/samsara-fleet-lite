@@ -26,7 +26,6 @@ def status(
     # Setup logging
     level = logging.DEBUG if verbose else logging.INFO
     logging.basicConfig(level=level, format="%(asctime)s %(levelname)s %(message)s")
-    log = logging.getLogger(__name__)
 
     # Get local usernames
     manager = get_username_manager(Path(csv_path) if csv_path else None)

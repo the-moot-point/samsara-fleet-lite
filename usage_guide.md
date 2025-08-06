@@ -12,6 +12,9 @@ This system automatically processes new hires and terminations from OneDrive Exc
 
 ## Quick Start
 
+Before running any commands, set the `SAMSARA_BEARER_TOKEN` environment variable.
+The utilities will raise an `EnvironmentError` if it is missing.
+
 ### 1. Process Everything (Recommended)
 ```bash
 # Process both terminations and new hires using latest files

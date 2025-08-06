@@ -2,6 +2,7 @@
 Lightweight Samsara REST wrapper shared by add/update/deactivate flows.
 Enhanced with external ID support for reliable driver matching.
 """
+
 from __future__ import annotations
 import os, logging, backoff, requests
 from typing import Iterator, Any, Dict, List, Optional, Literal
@@ -11,8 +12,14 @@ from urllib.parse import quote
 log = logging.getLogger(__name__)
 _API = "https://api.samsara.com/v1"
 TOKEN = os.getenv("SAMSARA_BEARER_TOKEN")
+if not TOKEN:
+    raise EnvironmentError("SAMSARA_BEARER_TOKEN must be set")
+
 SESSION = requests.Session()
-SESSION.headers.update({"Authorization": f"Bearer {TOKEN}", "Content-Type": "application/json"})
+SESSION.headers.update(
+    {"Authorization": f"Bearer {TOKEN}", "Content-Type": "application/json"}
+)
+
 
 @backoff.on_exception(backoff.expo, requests.RequestException, max_tries=5)
 def _req(method: str, url: str, **kw) -> Any:
@@ -22,7 +29,10 @@ def _req(method: str, url: str, **kw) -> Any:
         resp.raise_for_status()
     return resp.json()
 
-def get_drivers_by_status(status: Literal["active", "deactivated"] = "active") -> List[Dict]:
+
+def get_drivers_by_status(
+    status: Literal["active", "deactivated"] = "active",
+) -> List[Dict]:
     """
     Get drivers filtered by activation status.
 
@@ -53,6 +63,7 @@ def get_drivers_by_status(status: Literal["active", "deactivated"] = "active") -
     log.info(f"Retrieved {len(out)} {status} drivers")
     return out
 
+
 def get_all_drivers(include_deactivated: bool = True) -> List[Dict]:
     """
     Get all drivers from Samsara.
@@ -75,9 +86,12 @@ def get_all_drivers(include_deactivated: bool = True) -> List[Dict]:
 
     # Combine both lists
     all_drivers = active_drivers + deactivated_drivers
-    log.info(f"Total drivers retrieved: {len(all_drivers)} ({len(active_drivers)} active, {len(deactivated_drivers)} deactivated)")
+    log.info(
+        f"Total drivers retrieved: {len(all_drivers)} ({len(active_drivers)} active, {len(deactivated_drivers)} deactivated)"
+    )
 
     return all_drivers
+
 
 def get_driver_usernames(include_deactivated: bool = True) -> Dict[str, str]:
     """
@@ -95,22 +109,27 @@ def get_driver_usernames(include_deactivated: bool = True) -> Dict[str, str]:
     # Get active drivers
     active_drivers = get_drivers_by_status("active")
     for driver in active_drivers:
-        if 'username' in driver and driver['username']:
-            usernames[driver['username']] = "active"
+        if "username" in driver and driver["username"]:
+            usernames[driver["username"]] = "active"
 
     if include_deactivated:
         # Get deactivated drivers
         deactivated_drivers = get_drivers_by_status("deactivated")
         for driver in deactivated_drivers:
-            if 'username' in driver and driver['username']:
-                usernames[driver['username']] = "deactivated"
+            if "username" in driver and driver["username"]:
+                usernames[driver["username"]] = "deactivated"
 
-    log.info(f"Found {len(usernames)} total usernames ({sum(1 for s in usernames.values() if s == 'active')} active, "
-             f"{sum(1 for s in usernames.values() if s == 'deactivated')} deactivated)")
+    log.info(
+        f"Found {len(usernames)} total usernames ({sum(1 for s in usernames.values() if s == 'active')} active, "
+        f"{sum(1 for s in usernames.values() if s == 'deactivated')} deactivated)"
+    )
 
     return usernames
 
-def get_driver_by_external_id(external_id_key: str, external_id_value: str) -> Optional[Dict]:
+
+def get_driver_by_external_id(
+    external_id_key: str, external_id_value: str
+) -> Optional[Dict]:
     """
     Get a driver by external ID.
 
@@ -124,7 +143,7 @@ def get_driver_by_external_id(external_id_key: str, external_id_value: str) -> O
     try:
         # URL encode the external ID (key:value format)
         external_id = f"{external_id_key}:{external_id_value}"
-        encoded_id = quote(external_id, safe='')
+        encoded_id = quote(external_id, safe="")
 
         # Make the API call
         url = f"/fleet/drivers/{encoded_id}"
@@ -135,7 +154,9 @@ def get_driver_by_external_id(external_id_key: str, external_id_value: str) -> O
 
     except requests.HTTPError as e:
         if e.response.status_code == 404:
-            log.info(f"Driver not found with external ID: {external_id_key}:{external_id_value}")
+            log.info(
+                f"Driver not found with external ID: {external_id_key}:{external_id_value}"
+            )
             return None
         else:
             log.error(f"Error fetching driver by external ID: {e}")
@@ -144,7 +165,10 @@ def get_driver_by_external_id(external_id_key: str, external_id_value: str) -> O
         log.error(f"Unexpected error fetching driver by external ID: {e}")
         return None
 
-def update_driver_by_external_id(external_id_key: str, external_id_value: str, patch: dict) -> bool:
+
+def update_driver_by_external_id(
+    external_id_key: str, external_id_value: str, patch: dict
+) -> bool:
     """
     Update a driver using their external ID.
 
@@ -159,7 +183,7 @@ def update_driver_by_external_id(external_id_key: str, external_id_value: str, p
     try:
         # URL encode the external ID (key:value format)
         external_id = f"{external_id_key}:{external_id_value}"
-        encoded_id = quote(external_id, safe='')
+        encoded_id = quote(external_id, safe="")
 
         # Make the API call
         url = f"/fleet/drivers/{encoded_id}"
@@ -170,7 +194,9 @@ def update_driver_by_external_id(external_id_key: str, external_id_value: str, p
 
     except requests.HTTPError as e:
         if e.response.status_code == 404:
-            log.error(f"Driver not found with external ID: {external_id_key}:{external_id_value}")
+            log.error(
+                f"Driver not found with external ID: {external_id_key}:{external_id_value}"
+            )
             return False
         else:
             log.error(f"Error updating driver by external ID: {e}")
@@ -179,7 +205,10 @@ def update_driver_by_external_id(external_id_key: str, external_id_value: str, p
         log.error(f"Unexpected error updating driver by external ID: {e}")
         return False
 
-def deactivate_driver_by_external_id(external_id_key: str, external_id_value: str, termination_date: str = None) -> bool:
+
+def deactivate_driver_by_external_id(
+    external_id_key: str, external_id_value: str, termination_date: str = None
+) -> bool:
     """
     Deactivate a driver using their external ID.
 
@@ -198,15 +227,20 @@ def deactivate_driver_by_external_id(external_id_key: str, external_id_value: st
 
     return update_driver_by_external_id(external_id_key, external_id_value, patch_data)
 
+
 def add_driver(payload: BaseModel) -> None:
     """Add a new driver to Samsara."""
     _req("POST", "/fleet/drivers", json=payload.dict(exclude_none=True))
+
 
 def patch_driver(_id: str, patch: dict) -> None:
     """Update an existing driver by Samsara ID (legacy method)."""
     _req("PATCH", f"/fleet/drivers/{_id}", json=patch)
 
-def add_external_id_to_driver(driver_id: str, external_id_key: str, external_id_value: str) -> bool:
+
+def add_external_id_to_driver(
+    driver_id: str, external_id_key: str, external_id_value: str
+) -> bool:
     """
     Add or update an external ID for an existing driver.
 
@@ -230,7 +264,9 @@ def add_external_id_to_driver(driver_id: str, external_id_key: str, external_id_
         patch_data = {"externalIds": external_ids}
         patch_driver(driver_id, patch_data)
 
-        log.info(f"Added external ID {external_id_key}:{external_id_value} to driver {driver_id}")
+        log.info(
+            f"Added external ID {external_id_key}:{external_id_value} to driver {driver_id}"
+        )
         return True
 
     except Exception as e:

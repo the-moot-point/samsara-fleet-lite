@@ -27,9 +27,21 @@ SESSION.headers.update(
 
 @backoff.on_exception(backoff.expo, requests.RequestException, max_tries=5)
 def _req(method: str, url: str, **kw) -> Any:
-    resp = SESSION.request(method, _API + url, timeout=10, **kw)
+    @backoff.on_predicate(
+        backoff.expo,
+        lambda r: r.status_code == 429 or r.status_code >= 500,
+        max_tries=5,
+    )
+    def _do_request() -> requests.Response:
+        return SESSION.request(method, _API + url, timeout=10, **kw)
+
+    resp = _do_request()
     if resp.status_code >= 400:
         log.error("Samsara %s %s → %s • %s", method, url, resp.status_code, resp.text)
+        if 400 <= resp.status_code < 500:
+            raise requests.HTTPError(
+                f"Client error {resp.status_code}: {resp.text}", response=resp
+            )
         resp.raise_for_status()
     return resp.json()
 

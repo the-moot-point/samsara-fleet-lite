@@ -2,6 +2,7 @@
 Username manager for handling duplicate checking and persistence.
 Ensures all usernames are unique across Samsara platform.
 """
+
 import pandas as pd
 from pathlib import Path
 from typing import Set
@@ -21,7 +22,9 @@ class UsernameManager:
         Args:
             csv_path: Path to usernames.csv file. Defaults to data/usernames.csv
         """
-        self.csv_path = csv_path or (Path(__file__).parent.parent / "data" / "usernames.csv")
+        self.csv_path = csv_path or (
+            Path(__file__).parent.parent / "data" / "usernames.csv"
+        )
         self._lock = threading.Lock()
         self._usernames: Set[str] = set()
         self._load_usernames()
@@ -32,19 +35,23 @@ class UsernameManager:
             try:
                 df = pd.read_csv(self.csv_path, dtype=str)
                 # Handle different possible column names
-                if 'username' in df.columns:
-                    self._usernames = set(df['username'].dropna().str.lower())
-                elif 'Username' in df.columns:
-                    self._usernames = set(df['Username'].dropna().str.lower())
+                if "username" in df.columns:
+                    self._usernames = set(df["username"].dropna().str.lower())
+                elif "Username" in df.columns:
+                    self._usernames = set(df["Username"].dropna().str.lower())
                 else:
                     # If no header or different header, assume first column
                     self._usernames = set(df.iloc[:, 0].dropna().str.lower())
-                log.info(f"Loaded {len(self._usernames)} existing usernames from {self.csv_path}")
+                log.info(
+                    f"Loaded {len(self._usernames)} existing usernames from {self.csv_path}"
+                )
             except Exception as e:
                 log.error(f"Error loading usernames from {self.csv_path}: {e}")
                 self._usernames = set()
         else:
-            log.info(f"No existing username file found at {self.csv_path}, starting fresh")
+            log.info(
+                f"No existing username file found at {self.csv_path}, starting fresh"
+            )
             self._usernames = set()
             # Create the file with header
             self._save_usernames()
@@ -56,7 +63,7 @@ class UsernameManager:
             self.csv_path.parent.mkdir(parents=True, exist_ok=True)
 
             # Save as DataFrame with single column
-            df = pd.DataFrame({'username': sorted(self._usernames)})
+            df = pd.DataFrame({"username": sorted(self._usernames)})
             df.to_csv(self.csv_path, index=False)
             log.debug(f"Saved {len(self._usernames)} usernames to {self.csv_path}")
         except Exception as e:
@@ -91,13 +98,17 @@ class UsernameManager:
                 if candidate not in self._usernames:
                     self._usernames.add(candidate)
                     self._save_usernames()
-                    log.info(f"Username '{username}' was taken, using '{candidate}' instead")
+                    log.info(
+                        f"Username '{username}' was taken, using '{candidate}' instead"
+                    )
                     return candidate
                 counter += 1
 
                 # Safety check to prevent infinite loop
                 if counter > 9999:
-                    raise ValueError(f"Unable to generate unique username for base: {username}")
+                    raise ValueError(
+                        f"Unable to generate unique username for base: {username}"
+                    )
 
     def add_username(self, username: str) -> None:
         """
@@ -151,7 +162,9 @@ class UsernameManager:
 
             if after_count > before_count:
                 self._save_usernames()
-                log.info(f"Synced with Samsara: added {after_count - before_count} new usernames")
+                log.info(
+                    f"Synced with Samsara: added {after_count - before_count} new usernames"
+                )
 
 
 # Global singleton instance

@@ -40,6 +40,7 @@ def _setup_transformer(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(um, "get_username_manager", lambda: DummyUM())
 
     import src.transformer as transformer
+
     importlib.reload(transformer)
 
     monkeypatch.setattr(

@@ -168,11 +168,9 @@ def check(
     # Check if it exists
     if manager.exists(base):
         typer.echo(f"Base username '{base}' already exists.")
-        # Find what would be generated
-        test_unique = manager.make_unique(base)
+        # Preview the unique username without modifying state
+        test_unique = manager.check_available(base)
         typer.echo(f"Would generate: {test_unique}")
-        # Remove it since this was just a test
-        manager._usernames.discard(test_unique)
     else:
         typer.echo(f"Username '{base}' is available.")
 

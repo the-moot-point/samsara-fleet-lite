@@ -1,4 +1,4 @@
-from models import DriverAddPayload, CarrierSettings
+from src.models import DriverAddPayload, CarrierSettings
 from config import settings
 from username_manager import get_username_manager
 import re

@@ -6,7 +6,7 @@ Handles both new hires and termination reports from OneDrive directories.
 import re
 from pathlib import Path
 from datetime import datetime
-from typing import Optional
+from typing import Dict, Optional, Union
 import logging
 
 log = logging.getLogger(__name__)
@@ -113,7 +113,7 @@ class PayrollFileFinder:
 
         return latest_file
 
-    def get_file_info(self, file_path: Path) -> dict:
+    def get_file_info(self, file_path: Path) -> Dict[str, Union[str, int, bool, float]]:
         """
         Get information about a report file.
 
@@ -123,7 +123,7 @@ class PayrollFileFinder:
         Returns:
             Dictionary with file information
         """
-        info = {
+        info: Dict[str, Union[str, int, bool, float]] = {
             "path": str(file_path),
             "name": file_path.name,
             "size": file_path.stat().st_size if file_path.exists() else 0,

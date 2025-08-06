@@ -5,10 +5,10 @@ The system now uses a composite external ID (`paycomname`) to create a reliable 
 
 ## External ID Format
 - **Key**: `paycomname`
-- **Value**: `FirstName_LastName_MM-DD-YYYY`
-- **Example**: `John_Smith_01-15-2024`
+- **Value**: `FirstName-LastName_MM-DD-YYYY`
+- **Example**: `John-Smith_01-15-2024`
 
-The format is URL-safe with alphanumeric characters only, underscores as separators, and the hire date in MM-DD-YYYY format (matching Paycom's format).
+The format is URL-safe with alphanumeric characters only, using a hyphen between the first and last name, an underscore before the hire date, and the hire date in MM-DD-YYYY format (matching Paycom's format).
 
 ## Key Changes Made
 
@@ -201,16 +201,16 @@ python main.py migrate backfill-external-ids --csv manual_fixes.csv --execute
 
 ### Samsara External ID Format
 - URL: `/fleet/drivers/{externalIdKey}:{externalIdValue}`
-- Encoded: `/fleet/drivers/paycomname%3AJohn_Smith_01-15-2024`
+    - Encoded: `/fleet/drivers/paycomname%3AJohn-Smith_01-15-2024`
 - Supports GET, PATCH, DELETE operations
 
 ### Example API Calls
 ```python
 # Get driver
-GET /fleet/drivers/paycomname%3AJohn_Smith_01-15-2024
+GET /fleet/drivers/paycomname%3AJohn-Smith_01-15-2024
 
 # Update driver
-PATCH /fleet/drivers/paycomname%3AJohn_Smith_01-15-2024
+PATCH /fleet/drivers/paycomname%3AJohn-Smith_01-15-2024
 {
   "driverActivationStatus": "deactivated",
   "notes": "Terminated: 12-31-2024"

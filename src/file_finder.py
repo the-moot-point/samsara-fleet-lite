@@ -59,8 +59,9 @@ class PayrollFileFinder:
         """
         return self._find_latest_file(self.terms_dir, self.TERM_PATTERN, "New Terms")
 
+    @staticmethod
     def _find_latest_file(
-        self, directory: Path, pattern: re.Pattern, report_type: str
+        directory: Path, pattern: re.Pattern, report_type: str
     ) -> Optional[Path]:
         """
         Find the most recent file matching the pattern in the directory.

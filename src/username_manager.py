@@ -3,11 +3,13 @@ Username manager for handling duplicate checking and persistence.
 Ensures all usernames are unique across Samsara platform.
 """
 
-import pandas as pd
-from pathlib import Path
-from typing import Set
+import atexit
 import logging
 import threading
+from pathlib import Path
+from typing import Set
+
+import pandas as pd
 
 log = logging.getLogger(__name__)
 
@@ -27,6 +29,9 @@ class UsernameManager:
         )
         self._lock = threading.Lock()
         self._usernames: Set[str] = set()
+        self._pending_count = 0
+        self._dirty = False
+        atexit.register(self.flush)
         self._load_usernames()
 
     def _load_usernames(self) -> None:
@@ -70,6 +75,25 @@ class UsernameManager:
             log.error(f"Error saving usernames to {self.csv_path}: {e}")
             raise
 
+    def _flush_locked(self) -> None:
+        """Flush pending usernames to disk. Lock must be held."""
+        if self._dirty:
+            self._save_usernames()
+            self._pending_count = 0
+            self._dirty = False
+
+    def flush(self) -> None:
+        """Flush pending usernames to disk."""
+        with self._lock:
+            self._flush_locked()
+
+    def __del__(self) -> None:
+        """Flush pending usernames when the manager is garbage collected."""
+        try:
+            self.flush()
+        except Exception:  # pragma: no cover - best effort
+            pass
+
     def make_unique(self, base_username: str) -> str:
         """
         Generate a unique username based on the provided base.
@@ -88,7 +112,10 @@ class UsernameManager:
             # If it's already unique, return it
             if username not in self._usernames:
                 self._usernames.add(username)
-                self._save_usernames()
+                self._pending_count += 1
+                self._dirty = True
+                if self._pending_count >= 10:
+                    self._flush_locked()
                 return username
 
             # Try appending numbers until we find a unique one
@@ -97,7 +124,10 @@ class UsernameManager:
                 candidate = f"{username}{counter}"
                 if candidate not in self._usernames:
                     self._usernames.add(candidate)
-                    self._save_usernames()
+                    self._pending_count += 1
+                    self._dirty = True
+                    if self._pending_count >= 10:
+                        self._flush_locked()
                     log.info(
                         f"Username '{username}' was taken, using '{candidate}' instead"
                     )
@@ -122,7 +152,10 @@ class UsernameManager:
             username_lower = username.lower()
             if username_lower not in self._usernames:
                 self._usernames.add(username_lower)
-                self._save_usernames()
+                self._pending_count += 1
+                self._dirty = True
+                if self._pending_count >= 10:
+                    self._flush_locked()
                 log.debug(f"Added existing username: {username}")
 
     def exists(self, username: str) -> bool:
@@ -161,10 +194,12 @@ class UsernameManager:
             after_count = len(self._usernames)
 
             if after_count > before_count:
-                self._save_usernames()
-                log.info(
-                    f"Synced with Samsara: added {after_count - before_count} new usernames"
-                )
+                new_count = after_count - before_count
+                self._pending_count += new_count
+                self._dirty = True
+                if self._pending_count >= 10:
+                    self._flush_locked()
+                log.info(f"Synced with Samsara: added {new_count} new usernames")
 
 
 # Global singleton instance

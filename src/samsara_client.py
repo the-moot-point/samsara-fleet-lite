@@ -246,7 +246,7 @@ def deactivate_driver_by_external_id(
 
 def add_driver(payload: BaseModel) -> None:
     """Add a new driver to Samsara."""
-    _req("POST", "/fleet/drivers", json=payload.dict(exclude_none=True))
+    _req("POST", "/fleet/drivers", json=payload.model_dump(exclude_none=True))
 
 
 def patch_driver(_id: str, patch: dict) -> None:

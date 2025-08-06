@@ -4,8 +4,12 @@ Enhanced with external ID support for reliable driver matching.
 """
 
 from __future__ import annotations
-import os, logging, backoff, requests
-from typing import Iterator, Any, Dict, List, Optional, Literal
+
+import backoff
+import logging
+import os
+import requests
+from typing import Any, Dict, List, Literal, Optional
 from pydantic import BaseModel
 from urllib.parse import quote
 

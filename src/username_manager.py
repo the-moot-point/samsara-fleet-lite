@@ -100,8 +100,8 @@ class UsernameManager:
         """Flush pending usernames when the manager is garbage collected."""
         try:
             self.flush()
-        except Exception:  # pragma: no cover - best effort
-            pass
+        except OSError:  # pragma: no cover - best effort
+            log.exception("Error flushing usernames on cleanup")
 
     def make_unique(self, base_username: str) -> str:
         """

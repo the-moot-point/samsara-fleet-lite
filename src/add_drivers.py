@@ -266,7 +266,7 @@ def main(
                 log.info(f"          External ID: paycomname:{paycom_key}")
                 if verbose:
                     log.debug(
-                        f"Payload: {json.dumps(payload.dict(exclude_none=True), indent=2)}"
+                        f"Payload: {json.dumps(payload.model_dump(exclude_none=True), indent=2)}"
                     )
                 stats["added"] += 1
             else:

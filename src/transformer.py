@@ -3,7 +3,7 @@ from config import settings
 from username_manager import get_username_manager
 import re
 import logging
-from pandas.api.types import isna
+import pandas as pd
 from mapping_loader import (
     load_position_tags,
     load_location_tags_and_timezones,
@@ -76,7 +76,7 @@ def row_to_payload(row) -> DriverAddPayload | None:
     tz = loc_info["timezone"] or "America/Chicago"
 
     pos_tag = None
-    if row.Position and not isna(row.Position) and row.Position.strip():
+    if row.Position and not pd.isna(row.Position) and row.Position.strip():
         pos_tag = _POS_TAGS.get(row.Position.strip())
         if not pos_tag:
             _log.warning(

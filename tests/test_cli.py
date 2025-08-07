@@ -1,3 +1,4 @@
+# ruff: noqa: E402
 import os
 import sys
 from pathlib import Path
@@ -83,7 +84,9 @@ def test_add_dry_run_smoke(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> N
     assert result.exit_code == 0
 
 
-def test_add_dry_run_update_verbose(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_add_dry_run_update_verbose(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     dummy = tmp_path / "dummy.xlsx"
     dummy.touch()
     df = _dummy_add_df()
@@ -94,13 +97,17 @@ def test_add_dry_run_update_verbose(tmp_path: Path, monkeypatch: pytest.MonkeyPa
         lambda *a, **k: {"driverActivationStatus": "active"},
     )
     monkeypatch.setattr(add_module, "add_driver", lambda *a, **k: True)
-    monkeypatch.setattr(add_module, "update_driver_by_external_id", lambda *a, **k: True)
+    monkeypatch.setattr(
+        add_module, "update_driver_by_external_id", lambda *a, **k: True
+    )
     monkeypatch.setattr(add_module, "row_to_payload", lambda row: DummyPayload())
     result = runner.invoke(add_main, ["--dry-run", "--update", "-v", str(dummy)])
     assert result.exit_code == 0
 
 
-def test_deactivate_dry_run_no_fallback(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_deactivate_dry_run_no_fallback(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     dummy = tmp_path / "dummy.xlsx"
     dummy.touch()
     df = _dummy_term_df()
@@ -114,16 +121,22 @@ def test_deactivate_dry_run_no_fallback(tmp_path: Path, monkeypatch: pytest.Monk
     assert result.exit_code == 0
 
 
-def test_deactivate_dry_run_fallback_verbose(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_deactivate_dry_run_fallback_verbose(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     dummy = tmp_path / "dummy.xlsx"
     dummy.touch()
     df = _dummy_term_df()
     monkeypatch.setattr(deactivate_module, "read_terminations_xlsx", lambda path: df)
-    monkeypatch.setattr(deactivate_module, "get_driver_by_external_id", lambda *a, **k: None)
+    monkeypatch.setattr(
+        deactivate_module, "get_driver_by_external_id", lambda *a, **k: None
+    )
     monkeypatch.setattr(
         deactivate_module,
         "get_all_drivers",
-        lambda include_deactivated=False: [{"id": "1", "name": "A B", "driverActivationStatus": "active"}],
+        lambda include_deactivated=False: [
+            {"id": "1", "name": "A B", "driverActivationStatus": "active"}
+        ],
     )
     monkeypatch.setattr(
         deactivate_module,
@@ -145,7 +158,9 @@ def test_update_dry_run_smoke(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -
         "get_driver_by_external_id",
         lambda *a, **k: {"id": "1"},
     )
-    monkeypatch.setattr(update_module, "update_driver_by_external_id", lambda *a, **k: True)
+    monkeypatch.setattr(
+        update_module, "update_driver_by_external_id", lambda *a, **k: True
+    )
     monkeypatch.setattr(update_module, "row_to_payload", lambda row: DummyPayload())
     result = runner.invoke(update_main, ["--dry-run", str(dummy)])
     assert result.exit_code == 0

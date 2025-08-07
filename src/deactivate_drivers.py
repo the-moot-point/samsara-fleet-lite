@@ -9,8 +9,8 @@ import re
 from pathlib import Path
 from typing import Optional, Dict, List
 import pandas as pd
-from file_finder import PayrollFileFinder, get_latest_term_file
-from samsara_client import (
+from .file_finder import PayrollFileFinder, get_latest_term_file
+from .samsara_client import (
     get_all_drivers,
     patch_driver,
     get_driver_by_external_id,
@@ -334,7 +334,7 @@ def main(
 
                         # Try to add the external ID for future use
                         if paycom_key:
-                            from samsara_client import add_external_id_to_driver
+                            from .samsara_client import add_external_id_to_driver
 
                             add_external_id_to_driver(
                                 driver_id, "paycomname", paycom_key

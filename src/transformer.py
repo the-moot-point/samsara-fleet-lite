@@ -1,20 +1,23 @@
-from src.models import DriverAddPayload
+from .models import DriverAddPayload
 from config import settings
-from username_manager import get_username_manager
 import re
 import logging
 import pandas as pd
-from mapping_loader import (
-    load_position_tags,
-    load_location_tags_and_timezones,
-    load_never_positions,
+import importlib
+import sys
+
+mapping_loader = sys.modules.get("mapping_loader") or importlib.import_module(
+    ".mapping_loader", __package__
+)
+username_manager = sys.modules.get("username_manager") or importlib.import_module(
+    ".username_manager", __package__
 )
 
 # cache mappings
-_POS_TAGS = load_position_tags()
-_LOC_MAP = load_location_tags_and_timezones()
-_EXCLUDE_POS = load_never_positions()
-_USERNAME_MGR = get_username_manager()
+_POS_TAGS = mapping_loader.load_position_tags()
+_LOC_MAP = mapping_loader.load_location_tags_and_timezones()
+_EXCLUDE_POS = mapping_loader.load_never_positions()
+_USERNAME_MGR = username_manager.get_username_manager()
 _log = logging.getLogger(__name__)
 
 

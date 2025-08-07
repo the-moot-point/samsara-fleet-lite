@@ -7,11 +7,11 @@ import typer
 from datetime import datetime
 
 # Import command modules
-import add_drivers
-import deactivate_drivers
-import sync_usernames
-import migrate_external_ids
-from file_finder import PayrollFileFinder
+from . import add_drivers
+from . import deactivate_drivers
+from . import sync_usernames
+from . import migrate_external_ids
+from .file_finder import PayrollFileFinder
 
 app = typer.Typer(help="Samsara Driver Sync System")
 
@@ -137,7 +137,7 @@ def status():
         typer.echo("  Terms:     No reports found")
 
     # Check username database
-    from username_manager import get_username_manager
+    from .username_manager import get_username_manager
 
     try:
         manager = get_username_manager()
@@ -154,7 +154,7 @@ def status():
     # Check Samsara connection and external IDs
     typer.echo("\n🌐 Samsara API:")
     try:
-        from samsara_client import get_drivers_by_status
+        from .samsara_client import get_drivers_by_status
 
         active = get_drivers_by_status("active")
         deactivated = get_drivers_by_status("deactivated")
@@ -229,7 +229,10 @@ def test():
     # Test 3: Mapping files
     typer.echo("\n3. Testing mapping files...")
     try:
-        from mapping_loader import load_position_tags, load_location_tags_and_timezones
+        from .mapping_loader import (
+            load_position_tags,
+            load_location_tags_and_timezones,
+        )
 
         positions = load_position_tags()
         locations = load_location_tags_and_timezones()
@@ -243,7 +246,7 @@ def test():
     # Test 4: Username manager
     typer.echo("\n4. Testing username manager...")
     try:
-        from username_manager import get_username_manager
+        from .username_manager import get_username_manager
 
         manager = get_username_manager()
         # Preview a username to ensure manager responds without modifying state
@@ -257,7 +260,7 @@ def test():
     # Test 5: Samsara API
     typer.echo("\n5. Testing Samsara API connection...")
     try:
-        from samsara_client import get_drivers_by_status
+        from .samsara_client import get_drivers_by_status
 
         drivers = get_drivers_by_status("active")
         typer.echo(f"   ✅ API connected ({len(drivers)} active drivers)")
@@ -269,7 +272,7 @@ def test():
     # Test 6: External ID support
     typer.echo("\n6. Testing external ID functions...")
     try:
-        from samsara_client import get_driver_by_external_id
+        from .samsara_client import get_driver_by_external_id
 
         # Test with a non-existent ID (should return None, not error)
         result = get_driver_by_external_id("paycomname", "test_nonexistent_2099-01-01")
@@ -313,7 +316,7 @@ def quickstart():
     typer.echo("\nStep 2: Sync existing Samsara usernames...")
     typer.echo("This ensures we don't create duplicate usernames.")
     if typer.confirm("Sync usernames from Samsara?", default=True):
-        from sync_usernames import sync
+        from .sync_usernames import sync
 
         sync(verbose=False)
 
@@ -321,7 +324,7 @@ def quickstart():
     typer.echo("\nStep 3: Check external ID coverage...")
     typer.echo("External IDs ensure reliable driver matching.")
     if typer.confirm("Check external ID status?", default=True):
-        from migrate_external_ids import verify
+        from .migrate_external_ids import verify
 
         verify(verbose=False)
 

@@ -38,7 +38,7 @@ def backfill_external_ids(
     2. A CSV file with name and hire_date columns (--csv, dates in MM-DD-YYYY format)
     3. Manual entry for individual drivers
     """
-    from samsara_client import get_all_drivers, add_external_id_to_driver
+    from .samsara_client import get_all_drivers, add_external_id_to_driver
 
     # Setup logging
     level = logging.DEBUG if verbose else logging.INFO
@@ -80,7 +80,7 @@ def backfill_external_ids(
         # Load from hire report Excel
         typer.echo(f"\n📄 Loading employee data from: {hire_report}")
         try:
-            from payroll_reader import read_xlsx
+            from .payroll_reader import read_xlsx
 
             df = read_xlsx(hire_report)
             for _, row in df.iterrows():
@@ -215,7 +215,7 @@ def verify(
     """
     Verify the external ID coverage for all drivers.
     """
-    from samsara_client import get_all_drivers
+    from .samsara_client import get_all_drivers
 
     typer.echo("\n🔍 Verifying External ID Coverage...")
 
@@ -277,7 +277,7 @@ def add_single(
     """
     Add external ID for a single driver.
     """
-    from samsara_client import get_all_drivers, add_external_id_to_driver
+    from .samsara_client import get_all_drivers, add_external_id_to_driver
     import pandas as pd
 
     # Parse hire date

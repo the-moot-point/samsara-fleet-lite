@@ -6,8 +6,8 @@ Run this initially to populate usernames.csv with all existing drivers.
 import typer
 import logging
 from pathlib import Path
-from samsara_client import get_all_drivers, get_driver_usernames
-from username_manager import get_username_manager
+from .samsara_client import get_all_drivers, get_driver_usernames
+from .username_manager import get_username_manager
 
 app = typer.Typer()
 

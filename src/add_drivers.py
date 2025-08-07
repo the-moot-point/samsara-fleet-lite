@@ -3,15 +3,15 @@ import logging
 import json
 from pathlib import Path
 from typing import Optional
-from payroll_reader import read_xlsx
-from transformer import row_to_payload, _generate_paycom_key
-from samsara_client import (
+from .payroll_reader import read_xlsx
+from .transformer import row_to_payload, _generate_paycom_key
+from .samsara_client import (
     add_driver,
     get_driver_by_external_id,
     update_driver_by_external_id,
 )
-from username_manager import get_username_manager
-from file_finder import PayrollFileFinder, get_latest_hire_file
+from .username_manager import get_username_manager
+from .file_finder import PayrollFileFinder, get_latest_hire_file
 
 app = typer.Typer()
 
@@ -107,7 +107,7 @@ def main(
     # Optionally sync existing usernames first
     if sync_first:
         log.info("Syncing existing Samsara usernames (active and deactivated)...")
-        from samsara_client import get_all_drivers
+        from .samsara_client import get_all_drivers
 
         manager = get_username_manager()
         drivers = get_all_drivers(include_deactivated=True)
@@ -392,7 +392,7 @@ def check(
 
         # Check what username would be generated
         import re
-        from username_manager import get_username_manager
+        from .username_manager import get_username_manager
 
         manager = get_username_manager()
         base_username = re.sub(r"[^a-z0-9]", "", f"{first[0]}{last}".lower())

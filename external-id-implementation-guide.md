@@ -53,17 +53,17 @@ Migration utilities for existing drivers:
 ### Initial Setup (One-Time)
 ```bash
 # 1. Check system status
-python main.py status
+python -m src.main status
 
 # 2. Sync existing usernames
-python main.py username sync
+python -m src.main username sync
 
 # 3. Check external ID coverage
-python main.py migrate verify
+python -m src.main migrate verify
 
 # 4. Migrate existing drivers (if needed)
-python main.py migrate backfill-external-ids --hire-report path/to/recent_report.xlsx --dry-run
-python main.py migrate backfill-external-ids --hire-report path/to/recent_report.xlsx --execute
+python -m src.main migrate backfill-external-ids --hire-report path/to/recent_report.xlsx --dry-run
+python -m src.main migrate backfill-external-ids --hire-report path/to/recent_report.xlsx --execute
 ```
 
 ### Daily Operations
@@ -71,35 +71,35 @@ python main.py migrate backfill-external-ids --hire-report path/to/recent_report
 #### Process Everything (Recommended)
 ```bash
 # Preview changes
-python main.py process --dry-run
+python -m src.main process --dry-run
 
 # Execute with updates/reactivations
-python main.py process --update
+python -m src.main process --update
 
 # Execute without updates
-python main.py process
+python -m src.main process
 ```
 
 #### Process Individual Reports
 ```bash
 # Add new hires only
-python main.py add --update
+python -m src.main add --update
 
 # Deactivate terminations only
-python main.py deactivate
+python -m src.main deactivate
 
 # List available files
-python main.py add --list
-python main.py deactivate --list
+python -m src.main add --list
+python -m src.main deactivate --list
 ```
 
 #### Check Individual Drivers
 ```bash
 # Check if a driver exists
-python main.py add check John Smith 01-15-2024
+python -m src.main add check John Smith 01-15-2024
 
 # Check termination lookup
-python main.py deactivate check John Smith --hire-date 01-15-2024
+python -m src.main deactivate check John Smith --hire-date 01-15-2024
 ```
 
 ### Migration Commands
@@ -107,24 +107,24 @@ python main.py deactivate check John Smith --hire-date 01-15-2024
 #### Bulk Migration
 ```bash
 # Using a hire report
-python main.py migrate backfill-external-ids --hire-report report.xlsx --execute
+python -m src.main migrate backfill-external-ids --hire-report report.xlsx --execute
 
 # Using a custom CSV (columns: name, hire_date)
-python main.py migrate backfill-external-ids --csv employees.csv --execute
+python -m src.main migrate backfill-external-ids --csv employees.csv --execute
 ```
 
 #### Individual Migration
 ```bash
-python main.py migrate add-single John Smith 01-15-2024 --execute
+python -m src.main migrate add-single John Smith 01-15-2024 --execute
 ```
 
 #### Verification
 ```bash
 # Basic coverage stats
-python main.py migrate verify
+python -m src.main migrate verify
 
 # Detailed information
-python main.py migrate verify --verbose
+python -m src.main migrate verify --verbose
 ```
 
 ## Benefits
@@ -163,30 +163,30 @@ When an employee is rehired:
 ### Driver Not Found During Termination
 ```bash
 # Check if driver exists
-python main.py deactivate check FirstName LastName --hire-date MM-DD-YYYY
+python -m src.main deactivate check FirstName LastName --hire-date MM-DD-YYYY
 
 # If not found, verify the hire date matches exactly
-# Or enable fallback: python main.py deactivate --fallback
+# Or enable fallback: python -m src.main deactivate --fallback
 ```
 
 ### Duplicate Driver Created
 ```bash
 # Check external ID coverage
-python main.py migrate verify --verbose
+python -m src.main migrate verify --verbose
 
 # Find and fix duplicates manually, then add external ID
-python main.py migrate add-single FirstName LastName MM-DD-YYYY --execute
+python -m src.main migrate add-single FirstName LastName MM-DD-YYYY --execute
 ```
 
 ### Migration Issues
 ```bash
 # Extract hire dates from driver notes (if stored there)
-python main.py migrate backfill-external-ids --dry-run
+python -m src.main migrate backfill-external-ids --dry-run
 
 # Create manual CSV for missing data
 echo "name,hire_date" > manual_fixes.csv
 echo "John Smith,01-15-2024" >> manual_fixes.csv
-python main.py migrate backfill-external-ids --csv manual_fixes.csv --execute
+python -m src.main migrate backfill-external-ids --csv manual_fixes.csv --execute
 ```
 
 ## Best Practices

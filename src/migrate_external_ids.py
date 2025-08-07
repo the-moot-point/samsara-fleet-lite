@@ -199,7 +199,7 @@ def backfill_external_ids(
         typer.echo("   1. Create a CSV with columns: name, hire_date")
         typer.echo("   2. Format dates as MM-DD-YYYY")
         typer.echo(
-            "   3. Run: python migrate_external_ids.py backfill-external-ids --csv your_file.csv"
+            "   3. Run: python -m src.migrate_external_ids backfill-external-ids --csv your_file.csv"
         )
 
     if dry_run:

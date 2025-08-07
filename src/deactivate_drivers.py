@@ -124,8 +124,7 @@ def find_driver_by_name(
     return None
 
 
-@app.command()
-def main(
+def deactivate(
     file: Optional[str] = typer.Argument(
         None,
         help="Path to termination Excel file. If not provided, uses latest from OneDrive",
@@ -397,6 +396,38 @@ def main(
         raise typer.Exit(1)
 
 
+@app.callback(invoke_without_command=True)
+def _main(
+    ctx: typer.Context,
+    file: Optional[str] = typer.Argument(
+        None,
+        help="Path to termination Excel file. If not provided, uses latest from OneDrive",
+    ),
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="Preview changes without making API calls"
+    ),
+    verbose: bool = typer.Option(
+        False, "--verbose", "-v", help="Enable verbose logging"
+    ),
+    list_files: bool = typer.Option(
+        False, "--list", help="List available termination files and exit"
+    ),
+    fallback: bool = typer.Option(
+        True,
+        "--fallback/--no-fallback",
+        help="Use name matching as fallback when external ID not found",
+    ),
+) -> None:
+    if ctx.invoked_subcommand is None:
+        deactivate(
+            file=file,
+            dry_run=dry_run,
+            verbose=verbose,
+            list_files=list_files,
+            fallback=fallback,
+        )
+
+
 @app.command()
 def check(
     first: str = typer.Argument(..., help="First name"),
@@ -459,5 +490,9 @@ def check(
             typer.echo(f"   Searched for external ID: paycomname:{paycom_key}")
 
 
-if __name__ == "__main__":
+def main() -> None:
     app()
+
+
+if __name__ == "__main__":
+    main()

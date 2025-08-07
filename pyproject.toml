@@ -1,0 +1,21 @@
+[project]
+name = "samsara-fleet-lite"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = ["pandas", "openpyxl", "requests", "typer>=0.9"]
+
+[project.optional-dependencies]
+dev = ["ruff", "pytest", "black", "pre-commit"]
+
+[project.scripts]
+add-drivers = "src.add_drivers:main"
+deactivate-drivers = "src.deactivate_drivers:main"
+update-drivers = "src.update_drivers:main"
+
+[tool.black]
+line-length = 88
+target-version = ["py310"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"

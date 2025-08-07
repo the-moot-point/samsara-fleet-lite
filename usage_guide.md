@@ -18,40 +18,40 @@ The utilities will raise an `EnvironmentError` if it is missing.
 ### 1. Process Everything (Recommended)
 ```bash
 # Process both terminations and new hires using latest files
-python main.py process
+python -m src.main process
 
 # Test mode - preview changes without applying
-python main.py process --dry-run
+python -m src.main process --dry-run
 ```
 
 ### 2. Process New Hires Only
 ```bash
 # Use the latest New Hires Report automatically
-python add_drivers.py
+python -m src.add_drivers
 
 # Or specify a file manually
-python add_drivers.py "C:\path\to\specific_file.xlsx"
+python -m src.add_drivers "C:\path\to\specific_file.xlsx"
 
 # List available hire reports
-python add_drivers.py --list
+python -m src.add_drivers --list
 
 # Dry run to preview
-python add_drivers.py --dry-run
+python -m src.add_drivers --dry-run
 ```
 
 ### 3. Process Terminations Only
 ```bash
 # Use the latest New Terms Report automatically
-python deactivate_drivers.py
+python -m src.deactivate_drivers
 
 # Or specify a file manually
-python deactivate_drivers.py "C:\path\to\specific_file.xlsx"
+python -m src.deactivate_drivers "C:\path\to\specific_file.xlsx"
 
 # List available termination reports
-python deactivate_drivers.py --list
+python -m src.deactivate_drivers --list
 
 # Check if a specific person exists
-python deactivate_drivers.py check John Smith
+python -m src.deactivate_drivers check John Smith
 ```
 
 ## Main Commands
@@ -60,25 +60,25 @@ python deactivate_drivers.py check John Smith
 
 ```bash
 # Full processing workflow
-python main.py process
+python -m src.main process
 
 # Check system status
-python main.py status
+python -m src.main status
 
 # Run system tests
-python main.py test
+python -m src.main test
 
 # Username management
-python main.py username sync           # Sync with Samsara
-python main.py username stats          # Show statistics
-python main.py username check John Smith  # Test username generation
+python -m src.main username sync           # Sync with Samsara
+python -m src.main username stats          # Show statistics
+python -m src.main username check John Smith  # Test username generation
 ```
 
 ### Individual Scripts
 
 #### Add Drivers
 ```bash
-python add_drivers.py [OPTIONS] [FILE]
+python -m src.add_drivers [OPTIONS] [FILE]
 
 Options:
   --dry-run        Preview without making changes
@@ -89,7 +89,7 @@ Options:
 
 #### Deactivate Drivers
 ```bash
-python deactivate_drivers.py [OPTIONS] [FILE]
+python -m src.deactivate_drivers [OPTIONS] [FILE]
 
 Options:
   --dry-run        Preview without making changes
@@ -100,16 +100,16 @@ Options:
 #### Username Management
 ```bash
 # Sync existing Samsara usernames to local CSV
-python sync_usernames.py sync
+python -m src.sync_usernames sync
 
 # Check what username would be generated
-python sync_usernames.py check John Smith
+python -m src.sync_usernames check John Smith
 
 # Show username statistics
-python sync_usernames.py stats
+python -m src.sync_usernames stats
 
 # Check sync status with Samsara
-python sync_usernames.py status
+python -m src.sync_usernames status
 ```
 
 ## File Detection
@@ -161,7 +161,7 @@ LOG_FILE=driver_sync.log
 ### Daily Processing
 ```bash
 # Run the complete workflow
-python main.py process
+python -m src.main process
 
 # Output:
 # ============================================================
@@ -187,27 +187,27 @@ python main.py process
 ### Testing Changes
 ```bash
 # Always test first!
-python main.py process --dry-run --verbose
+python -m src.main process --dry-run --verbose
 
 # Check individual operations
-python add_drivers.py --dry-run
-python deactivate_drivers.py --dry-run
+python -m src.add_drivers --dry-run
+python -m src.deactivate_drivers --dry-run
 ```
 
 ### Troubleshooting
 ```bash
 # Check system status
-python main.py status
+python -m src.main status
 
 # Run system tests
-python main.py test
+python -m src.main test
 
 # Check username conflicts
-python sync_usernames.py status --verbose
+python -m src.sync_usernames status --verbose
 
 # List available files
-python add_drivers.py --list
-python deactivate_drivers.py --list
+python -m src.add_drivers --list
+python -m src.deactivate_drivers --list
 ```
 
 ## Username Handling
@@ -239,8 +239,8 @@ The system handles common issues:
 ## Best Practices
 
 1. **Always run with `--dry-run` first** to preview changes
-2. **Use `main.py process`** for the complete workflow
-3. **Check `main.py status`** before processing to verify setup
+2. **Use `python -m src.main process`** for the complete workflow
+3. **Check `python -m src.main status`** before processing to verify setup
 4. **Keep mapping CSV files updated** as locations/positions change
 5. **Run `username sync`** periodically to stay synchronized
 6. **Process terminations before new hires** to free up usernames
@@ -253,7 +253,7 @@ To run automatically, create a Windows Task Scheduler task:
 ```batch
 @echo off
 cd C:\path\to\your\project
-python main.py process >> sync_log.txt 2>&1
+python -m src.main process >> sync_log.txt 2>&1
 ```
 
 Schedule this to run daily after your OneDrive sync completes.

@@ -55,7 +55,7 @@ def process(
     typer.echo("📋 Step 1: Processing Terminations")
     typer.echo("-" * 40)
     try:
-        deactivate_drivers.main(
+        deactivate_drivers.deactivate(
             file=None,  # Use latest
             dry_run=dry_run,
             verbose=verbose,
@@ -72,7 +72,7 @@ def process(
     typer.echo("📋 Step 2: Processing New Hires")
     typer.echo("-" * 40)
     try:
-        add_drivers.main(
+        add_drivers.add(
             file=None,  # Use latest
             dry_run=dry_run,
             verbose=verbose,
@@ -336,27 +336,33 @@ def quickstart():
             typer.echo("\nMigration options:")
             typer.echo("1. If you have a recent hire report with all employees:")
             typer.echo(
-                "   python main.py migrate backfill-external-ids --hire-report path/to/report.xlsx --execute"
+                "   python -m src.main migrate backfill-external-ids --hire-report path/to/report.xlsx --execute"
             )
             typer.echo("\n2. For individual drivers:")
             typer.echo(
-                "   python main.py migrate add-single John Smith 01-15-2024 --execute"
+                "   python -m src.main migrate add-single John Smith 01-15-2024 --execute"
             )
 
     # Step 4: Process reports
     typer.echo("\nStep 4: Process payroll reports...")
     typer.echo("You can now process new hires and terminations.")
     typer.echo("\nCommon commands:")
-    typer.echo("  • Dry run (preview): python main.py process --dry-run")
-    typer.echo("  • Process all:       python main.py process")
-    typer.echo("  • With updates:      python main.py process --update")
-    typer.echo("  • Just new hires:    python main.py add")
-    typer.echo("  • Just terminations: python main.py deactivate")
+    typer.echo("  • Dry run (preview): python -m src.main process --dry-run")
+    typer.echo("  • Process all:       python -m src.main process")
+    typer.echo("  • With updates:      python -m src.main process --update")
+    typer.echo("  • Just new hires:    python -m src.main add")
+    typer.echo("  • Just terminations: python -m src.main deactivate")
 
     typer.echo("\n✅ Setup complete! You're ready to sync drivers.")
-    typer.echo("\n📚 For more help, check the README or run: python main.py --help")
-    typer.echo("=" * 60 + "\n")
+
+
+typer.echo("\n📚 For more help, check the README or run: python -m src.main --help")
+typer.echo("=" * 60 + "\n")
+
+
+def main() -> None:
+    app()
 
 
 if __name__ == "__main__":
-    app()
+    main()

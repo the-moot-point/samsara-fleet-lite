@@ -16,8 +16,7 @@ from .file_finder import PayrollFileFinder, get_latest_hire_file
 app = typer.Typer()
 
 
-@app.command()
-def main(
+def add(
     file: Optional[str] = typer.Argument(
         None, help="Path to Excel file. If not provided, uses latest from OneDrive"
     ),
@@ -341,6 +340,39 @@ def main(
         raise typer.Exit(1)
 
 
+@app.callback(invoke_without_command=True)
+def _main(
+    ctx: typer.Context,
+    file: Optional[str] = typer.Argument(
+        None, help="Path to Excel file. If not provided, uses latest from OneDrive"
+    ),
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="Preview changes without making API calls"
+    ),
+    verbose: bool = typer.Option(
+        False, "--verbose", "-v", help="Enable verbose logging"
+    ),
+    sync_first: bool = typer.Option(
+        False, "--sync", help="Sync with Samsara before processing"
+    ),
+    list_files: bool = typer.Option(
+        False, "--list", help="List available report files and exit"
+    ),
+    update_existing: bool = typer.Option(
+        False, "--update", help="Update existing drivers if found"
+    ),
+) -> None:
+    if ctx.invoked_subcommand is None:
+        add(
+            file=file,
+            dry_run=dry_run,
+            verbose=verbose,
+            sync_first=sync_first,
+            list_files=list_files,
+            update_existing=update_existing,
+        )
+
+
 @app.command()
 def check(
     first: str = typer.Argument(..., help="First name"),
@@ -402,5 +434,9 @@ def check(
             typer.echo("   A modified username would be generated")
 
 
-if __name__ == "__main__":
+def main() -> None:
     app()
+
+
+if __name__ == "__main__":
+    main()

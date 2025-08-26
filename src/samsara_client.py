@@ -8,7 +8,6 @@ from __future__ import annotations
 import backoff
 import logging
 import os
-import re
 import requests
 from typing import Any, Dict, List, Literal, Optional
 from pydantic import BaseModel
@@ -30,9 +29,8 @@ def _normalize_external_ids(payload: dict[str, Any]) -> None:
     """Canonicalize external ID keys to avoid duplicates.
 
     Collapses variants of the Encompass ID so that only one key is sent to the
-    API. Keys differing only by case, underscores, or hyphens (e.g.
-    ``EncompassId`` vs ``encompass_id`` or ``encompass-id``) are normalized to
-    ``encompassId``.
+    API. Keys differing only by case or underscores (e.g. ``EncompassId`` vs
+    ``encompass_id``) are normalized to ``encompassId``.
     """
     ids = payload.get("externalIds")
     if not isinstance(ids, dict):
@@ -40,7 +38,7 @@ def _normalize_external_ids(payload: dict[str, Any]) -> None:
 
     canonical: dict[str, str] = {}
     for key, value in ids.items():
-        normalized_key = re.sub(r"[^a-z0-9]", "", key.lower())
+        normalized_key = key.replace("_", "").lower()
         canon = "encompassId" if normalized_key == "encompassid" else key
         if canon not in canonical:
             canonical[canon] = value

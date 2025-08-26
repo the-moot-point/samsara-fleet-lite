@@ -11,7 +11,6 @@ def test_normalize_external_ids(monkeypatch):
         "externalIds": {
             "EncompassId": "8199",
             "encompass_id": "8199",
-            "encompass-id": "8199",
             "OTHER": "1",
         }
     }
@@ -42,13 +41,8 @@ def test_req_normalizes_external_ids(monkeypatch):
     sc._req(
         "PATCH",
         "/fleet/drivers/1",
-        json={
-            "externalIds": {
-                "EncompassId": "8199",
-                "encompass_id": "8199",
-                "encompass-id": "8199",
-            }
-        },
+        json={"externalIds": {"EncompassId": "8199", "encompass_id": "8199"}},
     )
 
     assert captured["json"]["externalIds"] == {"encompassId": "8199"}
+

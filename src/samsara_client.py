@@ -25,8 +25,33 @@ SESSION.headers.update(
 )
 
 
+def _normalize_external_ids(payload: dict[str, Any]) -> None:
+    """Canonicalize external ID keys to avoid duplicates.
+
+    Collapses variants of the Encompass ID so that only one key is sent to the
+    API. Keys differing only by case or underscores (e.g. ``EncompassId`` vs
+    ``encompass_id``) are normalized to ``encompassId``.
+    """
+    ids = payload.get("externalIds")
+    if not isinstance(ids, dict):
+        return
+
+    canonical: dict[str, str] = {}
+    for key, value in ids.items():
+        normalized_key = key.replace("_", "").lower()
+        canon = "encompassId" if normalized_key == "encompassid" else key
+        if canon not in canonical:
+            canonical[canon] = value
+
+    payload["externalIds"] = canonical
+
+
 @backoff.on_exception(backoff.expo, requests.RequestException, max_tries=5)
 def _req(method: str, url: str, **kw) -> Any:
+    json_payload = kw.get("json")
+    if isinstance(json_payload, dict):
+        _normalize_external_ids(json_payload)
+
     @backoff.on_predicate(
         backoff.expo,
         lambda r: r.status_code == 429 or r.status_code >= 500,

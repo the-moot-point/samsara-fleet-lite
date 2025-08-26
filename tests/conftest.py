@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from src.file_finder import PayrollFileFinder
+from src.file_finder import PayrollFileFinder  # noqa: E402
 
 
 @pytest.fixture
@@ -41,4 +41,3 @@ def payroll_finder(sample_report_dirs: Tuple[Path, Path]) -> PayrollFileFinder:
     """Return a PayrollFileFinder configured with the sample directories."""
     hires_dir, terms_dir = sample_report_dirs
     return PayrollFileFinder(hires_dir=hires_dir, terms_dir=terms_dir)
-

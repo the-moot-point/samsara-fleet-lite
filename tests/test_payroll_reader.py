@@ -3,7 +3,6 @@ import sys
 from pathlib import Path
 
 import pandas as pd
-import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -35,4 +34,3 @@ def test_read_xlsx_filters_and_formats(tmp_path: Path) -> None:
     assert (result.Employee_Status == "Active").all()
     assert pd.api.types.is_datetime64_any_dtype(result.Hire_Date)
     assert len(result) == 2
-

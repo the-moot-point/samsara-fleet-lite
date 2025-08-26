@@ -13,7 +13,6 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import src.migrate_external_ids as migrate_module
 from src.migrate_external_ids import app as migrate_main
 import src.samsara_client as sc
 import logging

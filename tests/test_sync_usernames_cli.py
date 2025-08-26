@@ -47,9 +47,7 @@ class DummyManager:
 
 def test_status_mismatched(monkeypatch: pytest.MonkeyPatch) -> None:
     manager = DummyManager({"alice", "bob"})
-    monkeypatch.setattr(
-        sync_module, "get_username_manager", lambda path=None: manager
-    )
+    monkeypatch.setattr(sync_module, "get_username_manager", lambda path=None: manager)
     monkeypatch.setattr(
         sync_module,
         "get_driver_usernames",
@@ -63,11 +61,11 @@ def test_status_mismatched(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_status_failure(monkeypatch: pytest.MonkeyPatch) -> None:
     manager = DummyManager(set())
-    monkeypatch.setattr(
-        sync_module, "get_username_manager", lambda path=None: manager
-    )
+    monkeypatch.setattr(sync_module, "get_username_manager", lambda path=None: manager)
+
     def _boom(*_args, **_kwargs):  # noqa: ANN001
         raise RuntimeError("boom")
+
     monkeypatch.setattr(sync_module, "get_driver_usernames", _boom)
     result = runner.invoke(username_app, ["status"])
     assert result.exit_code != 0
@@ -76,9 +74,7 @@ def test_status_failure(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_sync_success(monkeypatch: pytest.MonkeyPatch) -> None:
     manager = DummyManager({"alice"})
-    monkeypatch.setattr(
-        sync_module, "get_username_manager", lambda path=None: manager
-    )
+    monkeypatch.setattr(sync_module, "get_username_manager", lambda path=None: manager)
     monkeypatch.setattr(
         sync_module,
         "get_all_drivers",
@@ -95,11 +91,11 @@ def test_sync_success(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_sync_failure(monkeypatch: pytest.MonkeyPatch) -> None:
     manager = DummyManager(set())
-    monkeypatch.setattr(
-        sync_module, "get_username_manager", lambda path=None: manager
-    )
+    monkeypatch.setattr(sync_module, "get_username_manager", lambda path=None: manager)
+
     def _fail(*_args, **_kwargs):  # noqa: ANN001
         raise RuntimeError("api down")
+
     monkeypatch.setattr(sync_module, "get_all_drivers", _fail)
     result = runner.invoke(username_app, ["sync"])
     assert result.exit_code != 0
@@ -108,9 +104,7 @@ def test_sync_failure(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_check_existing_username(monkeypatch: pytest.MonkeyPatch) -> None:
     manager = DummyManager({"jdoe"})
-    monkeypatch.setattr(
-        sync_module, "get_username_manager", lambda path=None: manager
-    )
+    monkeypatch.setattr(sync_module, "get_username_manager", lambda path=None: manager)
     result = runner.invoke(username_app, ["check", "John", "Doe"])
     assert result.exit_code == 0
     assert "Base username 'jdoe' already exists." in result.output
@@ -119,9 +113,7 @@ def test_check_existing_username(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_stats_duplicates(monkeypatch: pytest.MonkeyPatch) -> None:
     manager = DummyManager({"alice", "bob1", "bob2"})
-    monkeypatch.setattr(
-        sync_module, "get_username_manager", lambda path=None: manager
-    )
+    monkeypatch.setattr(sync_module, "get_username_manager", lambda path=None: manager)
     result = runner.invoke(username_app, ["stats"])
     assert result.exit_code == 0
     assert "Total usernames: 3" in result.output

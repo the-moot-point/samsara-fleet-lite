@@ -12,9 +12,9 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import src.main as main_module
-import src.username_manager as username_manager_module
-import src.samsara_client as samsara_client_module
+import src.main as main_module  # noqa: E402
+import src.username_manager as username_manager_module  # noqa: E402
+import src.samsara_client as samsara_client_module  # noqa: E402
 
 runner = CliRunner()
 
@@ -52,7 +52,9 @@ def test_process_handles_missing_reports(monkeypatch: pytest.MonkeyPatch) -> Non
         calls.append("add")
         raise FileNotFoundError
 
-    monkeypatch.setattr(main_module.deactivate_drivers, "deactivate", missing_deactivate)
+    monkeypatch.setattr(
+        main_module.deactivate_drivers, "deactivate", missing_deactivate
+    )
     monkeypatch.setattr(main_module.add_drivers, "add", missing_add)
 
     result = runner.invoke(main_module.app, ["process"])
@@ -62,7 +64,9 @@ def test_process_handles_missing_reports(monkeypatch: pytest.MonkeyPatch) -> Non
     assert "No hire reports found" in result.output
 
 
-def test_status_reports_and_missing(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+def test_status_reports_and_missing(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
     hires_dir = tmp_path / "hires"
     terms_dir = tmp_path / "terms"
     hires_dir.mkdir()

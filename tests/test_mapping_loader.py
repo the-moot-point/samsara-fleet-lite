@@ -29,7 +29,9 @@ def test_load_position_tags(mapping_dir: Path, monkeypatch: pytest.MonkeyPatch) 
     assert ml.load_position_tags() == {"Driver": "123"}
 
 
-def test_load_location_tags_and_timezones(mapping_dir: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_load_location_tags_and_timezones(
+    mapping_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr(ml, "BASE_DIR", mapping_dir)
     assert ml.load_location_tags_and_timezones() == {
         "HQ": {"tag_id": "999", "timezone": "America/Chicago"},
@@ -37,6 +39,8 @@ def test_load_location_tags_and_timezones(mapping_dir: Path, monkeypatch: pytest
     }
 
 
-def test_load_never_positions(mapping_dir: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_load_never_positions(
+    mapping_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr(ml, "BASE_DIR", mapping_dir)
     assert ml.load_never_positions() == {"Intern"}

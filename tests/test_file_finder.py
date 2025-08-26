@@ -2,13 +2,12 @@ import sys
 from pathlib import Path
 from typing import Tuple
 
-import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from src.file_finder import PayrollFileFinder
+from src.file_finder import PayrollFileFinder  # noqa: E402
 
 
 def test_find_latest_reports(
@@ -68,4 +67,3 @@ def test_list_all_reports(payroll_finder: PayrollFileFinder) -> None:
         for item in reports[key]:
             assert {"path", "name", "size", "exists"}.issubset(item)
             assert "timestamp" in item
-
